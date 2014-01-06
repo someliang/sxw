@@ -1,0 +1,15 @@
+.ui-jqgrid-bdiv {
+    overflow-x: hidden !important;
+}
+
+.ui-autocomplete-loading {
+    background: white url('images/ui-anim_basic_16x16.gif') right center no-repeat !important;
+}
+
+.ui-autocomplete { position: absolute; cursor: default;z-index:9999 !important;}
+
+.cboxIframe {
+    width: 100% !important;
+    height: 100% !important;
+}
+

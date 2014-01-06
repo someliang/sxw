@@ -1,0 +1,44 @@
+<div class="row" ng-controller="translationController">
+    <p>
+        <button class="btn btn-success" ng-click="create()">添加</button>
+    </p>
+    <div class="col-xs-12">
+        <form novalidate class="form-horizontal" name="translationForm" role="form">
+            <div class="form-group has-error">
+                <label class="col-sm-3 control-label no-padding-right" for="code"> 标识编码 </label>
+                <div class="col-sm-9">
+                    <input type="text" required ng-model = "translation.code" name="code" id="code" placeholder="标识编码" class="col-xs-10 col-sm-5"/>
+                    <div class="has-error" ng-show="translationForm.code.$dirty && translationForm.code.$invalid">
+                        <small class="help-block col-xs-12 col-sm-reset inline" ng-show="translationForm.code.$error.required">
+                            标识编码必填哦.
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right" for="categoryName"> 类别 </label>
+                <div class="col-sm-9">
+                    <input type="text" required name="categoryName" id="categoryName" placeholder="类别" class="col-xs-10 col-sm-5"/>
+                </div>
+            </div>
+            <div class="form-group has-error">
+                <label class="col-sm-3 control-label no-padding-right" for="name"> 描述  </label>
+                <div class="col-sm-9">
+                    <input type="text" required ng-model = "translation.name" name="name" id="name" placeholder="描述" class="col-xs-10 col-sm-5"/>
+                    <div class="has-error" ng-show="translationForm.name.$dirty && translationForm.name.$invalid">
+                        <small class="help-block col-xs-12 col-sm-reset inline" ng-show="translationForm.name.$error.required">
+                           描述必填哦.
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label no-padding-right" for="priority"> 优先级 </label>
+                <div class="col-sm-9">
+                    <input type="text" ng-model = "translation.priority" name="priority" id="priority" placeholder="优先级" class="col-xs-10 col-sm-5"/>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+

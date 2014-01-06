@@ -1,0 +1,5 @@
+<select>
+    {%for translation in translations %}
+        <option value='{{translation.id}}'>{{translation.name}}</option>
+    {% endfor %}
+</select>

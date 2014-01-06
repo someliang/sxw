@@ -1,0 +1,28 @@
+{
+  "name": "node_cms",
+  "author": {
+    "name": "Lonso Liu",
+    "email": "lonso@foxmail.com"
+  },
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "3.4.0",
+    "ejs": "*",
+    "swig": "latest",
+    "consolidate": "latest",
+    "cansecurity": "latest",
+    "formidable": "latest",
+    "orm": "latest",
+    "async": "latest",
+    "moment": "latest",
+    "validator": "latest",
+    "log4js": "latest",
+    "passport": "latest",
+    "passport-local": "latest",
+    "connect-flash": "latest"
+  }
+}

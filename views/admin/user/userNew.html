@@ -1,0 +1,57 @@
+<div class='row' ng-controller='adminController'>
+    <p>
+        <button class='btn btn-success' ng-click='create()'>添加</button>
+    </p>
+    <div class='col-xs-12'>
+        <form novalidate class='form-horizontal' name='userForm' role='form'>
+            <div class='form-group has-error'>
+                <label class='col-sm-3 control-label no-padding-right' for='username'> 用户名 </label>
+                <div class='col-sm-9'>
+                    <input type='text' required ng-model = 'user.username' name='username' id='username' placeholder='用户名' class='col-xs-10 col-sm-5'/>
+                    <div class='has-error' ng-show='userForm.username.$dirty && userForm.username.$invalid'>
+                        <small class='help-block col-xs-12 col-sm-reset inline' ng-show='userForm.username.$error.required'>
+                            用户名必填哦.
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class='form-group has-error'>
+                <label class='col-sm-3 control-label no-padding-right' for='password'> 密码  </label>
+                <div class='col-sm-9'>
+                    <input ng-minlength='6' type='password' required ng-model = 'user.password' name='password' id='password' placeholder='密码' class='col-xs-10 col-sm-5'/>
+                    <div class='has-error' ng-show='userForm.password.$dirty && userForm.password.$invalid'>
+                        <small class='help-block col-xs-12 col-sm-reset inline' ng-show='userForm.password.$error.required'>
+                            密码必填哦.
+                        </small>
+                        <small class='help-block col-xs-12 col-sm-reset inline' ng-show='userForm.password.$error.minlength'>
+                            密码最少6位哦.
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class='form-group has-error'>
+                <label class='col-sm-3 control-label no-padding-right' for='confirmPassword'> 确认密码  </label>
+                <div class='col-sm-9'>
+                    <input ng-minlength='6' type='password' required ng-model = 'user.confirmPassword' name='confirmPassword' id='confirmPassword' placeholder='确认密码' class='col-xs-10 col-sm-5'/>
+                    <div class='has-error' ng-show='userForm.confirmPassword.$dirty && userForm.confirmPassword.$invalid'>
+                        <small class='help-block col-xs-12 col-sm-reset inline' ng-show='userForm.confirmPassword.$error.required'>
+                            密码必填哦.
+                        </small>
+                        <small class='help-block col-xs-12 col-sm-reset inline' ng-show='userForm.confirmPassword.$error.minlength'>
+                            密码最少6位哦.
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <div class='form-group'>
+                <label class='col-sm-3 control-label no-padding-right' for='is_admin'> 是否为超级管理员 </label>
+                <div class='col-sm-9'>
+                    <input name= 'is_admin' id = 'is_admin' ng-model = 'user.is_admin' class='ace ace-switch ace-switch-5' type='checkbox'/>
+                    <span class='lbl'></span>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
