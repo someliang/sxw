@@ -46,6 +46,20 @@ app.use(orm.express('mysql://root:@127.0.0.1/sxw', {
             is_admin: {type: 'boolean'}
         });
 
+        models.school = db.define('sxw_school', {
+            name: {type: 'text'},
+            badge: {type: 'text'},
+            province: {type: 'number', rational: true},
+            category: {type: 'number', rational: true},
+            summary: {type: 'binary'},
+            description: {type: 'binary'}
+        });
+
+        models.translation2school = db.define('sxw_translation2school', {
+            sxw_translation_id: {type: 'number', rational: true},
+            sxw_school_id: {type: 'number', rational: true}
+        });
+
         db.sync(function (err) {
             if(err) throw err;
             console.log('sync databases done!');

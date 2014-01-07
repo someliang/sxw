@@ -260,6 +260,7 @@ exports.translationDelete = function(req, res){
 };
 
 
+//自动提示分类父类别信息
 exports.getCategory = function(req, res){
     var Translation = req.models.translation;
     var items = [];
@@ -303,4 +304,44 @@ exports.getCategory = function(req, res){
 
         });
     })
+};
+
+
+function getTranslationByFlag(req, flag, cb){
+    var Translation = req.models.translation;
+    Translation.find({code: flag}).all(function(err, items){
+        cb(err, items)
+    })
+}
+
+
+exports.getProvinces = function(req, res){
+    getTranslationByFlag(req, 'province', function(err, items){
+        if (err) {
+            console.error("getProvinces ====>" + err.message);
+            return res.json({isSuccess: false});
+        }
+        res.json({isSuccess: true, items: items});
+    })
+};
+
+exports.getSchoolCategories = function(req, res){
+    getTranslationByFlag(req, 'schoolcategory', function(err, items){
+        if (err) {
+            console.error("getSchoolCategories ====>" + err.message);
+            return res.json({isSuccess: false});
+        }
+        res.json({isSuccess: true, items: items});
+    })
+};
+
+exports.getSchoolCharacters = function(req, res) {
+    getTranslationByFlag(req, 'character', function(err, items){
+        if (err) {
+            console.error("getSchoolCharacters ====>" + err.message);
+            return res.json({isSuccess: false});
+        }
+        res.json({isSuccess: true, items: items});
+    })
+
 };

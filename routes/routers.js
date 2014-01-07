@@ -7,6 +7,7 @@
  */
 
 var index = require('../controllers/index.js')
+    , school = require('../controllers/school.js')
     , translation = require('../controllers/translation.js')
     , uploadController = require('../controllers/upload.js')
     , authenticate = require('../config/authenticate.js')
@@ -30,14 +31,24 @@ module.exports = function (app) {
         })(req, res, next);
     });
 
-//    app.all('*', authenticate.ensureAuthenticated);
+    app.all('*', authenticate.ensureAuthenticated);
 
     //basic
     app.get('/', index.index);
     app.get('/getTranslationSelectStyle', translation.getTranslationSelectStyle);
-
-
     app.get('/getCategory', translation.getCategory);
+    app.get('/getProvinces', translation.getProvinces);
+    app.get('/getSchoolCategories', translation.getSchoolCategories);
+    app.get('/getSchoolCharacters', translation.getSchoolCharacters);
+
+    //school
+    app.get('/school/new', school.schoolNew);
+    app.get('/school/list', school.schoolList);
+    app.post('/school', school.schoolCreate);
+
+
+
+
 
     //translation url
     app.get('/translations', translation.getTranslations);

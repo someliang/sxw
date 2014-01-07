@@ -1,0 +1,71 @@
+<div class='row' ng-controller='schoolController'>
+    <p>
+        <button class='btn btn-success' ng-click='create()'>添加</button>
+    </p>
+    <div class='col-xs-12'>
+        <form novalidate class='form-horizontal' name='schoolForm' role='form'>
+            <div class='form-group has-error'>
+                <label class='col-sm-3 control-label no-padding-right' for='name'> 学校名称 </label>
+                <div class='col-sm-9'>
+                    <input type='text' required ng-model = 'school.name' name='name' id='name' placeholder='学校名称' class='col-xs-10 col-sm-5'/>
+                    <div class='has-error' ng-show='schoolForm.name.$dirty && schoolForm.name.$invalid'>
+                        <small class='help-block col-xs-12 col-sm-reset inline' ng-show='schoolForm.name.$error.required'>
+                            学校名称必填哦.
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class='form-group formCoverDiv'>
+                <label class='col-sm-3 control-label no-padding-right' for='badge'> 校徽图 </label>
+                <div class='col-sm-9'>
+                    <div class = 'row col-xs-10 col-sm-5'>
+                        <input type='file' name='badge' ng-model = 'school.badge' id='badge' ng-file-select='onFileSelect($files)' />
+                    </div>
+                </div>
+            </div>
+            <div class='form-group has-error'>
+                <label class='col-sm-3 control-label no-padding-right' for='province'> 省份 </label>
+                <div class='col-sm-9'>
+                    <select class='col-xs-10 col-sm-5' required id='province' ng-model='school.province' ng-options='m.id as m.name for m in provinces'>
+                        <option value=''>-- 请选择省份 --</option>
+                    </select>
+                </div>
+            </div>
+            <div class='form-group has-error'>
+                <label class='col-sm-3 control-label no-padding-right' for='category'> 学校类别 </label>
+                <div class='col-sm-9'>
+                    <select class='col-xs-10 col-sm-5' required id='category' ng-model='school.category' ng-options='m.id as m.name for m in categories'>
+                        <option value=''>-- 请选择学校类别 --</option>
+                    </select>
+                </div>
+            </div>
+            <div class='form-group has-error'>
+                <label class='col-sm-3 control-label no-padding-right' for='summary'> 简介 </label>
+                <div class='col-sm-9'>
+                    <textarea class='col-xs-10 col-sm-5' required id='summary' ng-model = 'school.summary' name='summary' placeholder='简介' class='form-control limited' maxlength='50'></textarea>
+                    <div class='has-error' ng-show ='form.schoolForm.summary.$dirty && form.schoolForm.summary.$invalid'>
+                        <small class='help-block col-xs-12 col-sm-reset inline' ng-show='form.schoolForm.summary.$error.required'>
+                            简介必填哦.
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class='form-group has-error schoolCharacter'>
+                <label class='col-sm-3 control-label no-padding-right' for='summary'> 学校特征 </label>
+                <div class='col-sm-9'>
+                    <label style="margin-right: 1%;" ng-repeat="character in characters">
+                        <input name='form-field-checkbox' type='checkbox' class='ace character' value='[[character.id]]'>
+                        <span class='lbl'> [[character.name]]</span>
+                    </label>
+                </div>
+            </div>
+            <div class='form-group has-error'>
+                <label class='col-sm-1 control-label no-padding-right' for='description'> 学校详情 </label>
+                <div class='col-sm-9'>
+                    <div id='description' class='row'></div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
