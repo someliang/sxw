@@ -44,9 +44,12 @@ module.exports = function (app) {
     //school
     app.get('/school/new', school.schoolNew);
     app.get('/school/list', school.schoolList);
+    app.get('/school/update', school.schoolUpdateForm);
+    app.get('/schools', school.schools);
     app.post('/school', school.schoolCreate);
-
-
+    app.get('/school', school.schoolRead);
+    app.put('/school', school.schoolUpdate);
+    app.delete('/school', school.schoolDelete);
 
 
 

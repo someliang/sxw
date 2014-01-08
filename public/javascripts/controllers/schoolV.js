@@ -9,6 +9,8 @@
 app.controller('schoolController', function ($scope, $http) {
 });
 
+
+var item = '';
 app.config(['$routeProvider', function ($routeProvider) {
     $routeProvider
         .when('/school/new', {
@@ -18,6 +20,10 @@ app.config(['$routeProvider', function ($routeProvider) {
         .when('/school/list', {
             controller: schoolVList,
             templateUrl: '/school/list'
+        })
+        .when('/school/update', {
+            controller: schoolVUpdate,
+            templateUrl: '/school/update'
         })
 }]);
 
@@ -142,6 +148,132 @@ function schoolVNew($scope, $http, $upload){
 
 }
 
-function schoolVList(){
+function schoolVList($scope, $http){
+    var jqgridConfig = {};
+    jqgridConfig.id = 'schoolList';
+    jqgridConfig.pager = 'schoolPager';
+    jqgridConfig.url = '/schools';
+    jqgridConfig.colNames =  ['ID', '学校名称', '学校所属省份', '学校类别', '校徽', '学校简介'];
+    jqgridConfig.colModel = [
+        {name: 'id', index: 'id', width: 25},
+        {name: 'name', index: 'name', editable: true, editrules: {required: true}, width: 30},
+        {name: 'province', index: 'province', editable: true, editrules: {required: true}, width: 30},
+        {name: 'category', index: 'category', editable: true, editrules: {required: true}, width: 30},
+        {name: 'badge', index: 'badge', search: false, formatter: imageFormat, editable: true, width: 42},
+        {name: 'summary', index: 'summary', editable: true, editrules: {required: true}, width: 30}
+    ];
+    jqgridConfig.caption = '学校列表';
+    jqgridConfig.editUrl = '/school';
+    jqGridInit(jqgridConfig);
+    var navigatorConfig = {};
+    navigatorConfig.edit = false;
+    navigatorConfig.add = false;
+    navigatorConfig.del = true;
+    navigatorConfig.serach = true;
+    navigatorConfig.view = true;
+    navigatorConfig.refresh = true;
+    navigationFunction('schoolList', 'schoolPager', navigatorConfig);
 
+    $scope.update = function() {
+        var rs = $('#schoolList').jqGrid('getGridParam','selarrrow');
+        if (rs.length <1) {
+            messageDialog('亲,至少要选择一个吧!');
+            return;
+        } else if (rs.length !== 1) {
+            messageDialog('亲,不要太贪心哦,一次只能修改一个!');
+            return;
+        } else {
+            $http({
+                method  : 'get',
+                url     : '/school',
+                params : { id: rs},
+                headers : { 'Content-Type': 'application/json' }  // set the headers so angular passing info as form data (not request payload)
+            }).success(function(data){
+                    if (!data.isSuccess) {
+                        messageDialog('Oops....出错了,请重新尝试');
+                        return;
+                    } else {
+                        item = data.item;
+                        location.href = '#/school/update';
+                    }
+                }).error(function(data) {
+                    messageDialog('Oops....出错了,请重新尝试');
+                    return;
+                });
+        }
+    }
+}
+
+function schoolVUpdate($scope, $http, $upload){
+    var ue = new UE.ui.Editor();
+    var imagePath = '';
+    ue.render('description');
+    if (!item) {
+        messageDialog('亲,你还没选择要修改的内容呢!!');
+        return;
+    } else {
+        $scope.school = item;
+        $scope.imagePath = item.badge;
+    }
+    ue.addListener("ready", function () {
+        ue.setContent(item.description);
+    });
+
+    initFileInput('#badge', true);
+    $scope.school.characterIds = '';
+    $('div.formCoverDiv a.remove').on('click', function(){
+        $scope.school.badge = '';
+    });
+    $scope.onFileSelect = function($files) {
+        for (var i = 0; i < $files.length; i++) {
+            $scope.school.badge = $files[i];
+        }
+    };
+    getProvinces($http, function(items){
+        $scope.provinces = items;
+
+    });
+    getSchoolCategories($http, function(items){
+        $scope.categories = items;
+    });
+    getSchoolCharacters($http, function(items){
+        $scope.characters = items;
+    });
+
+    $scope.save = function(){
+        if (!$scope.school.name) {
+            messageDialog('学校名称必填.');
+        } else if (!$scope.school.province) {
+            messageDialog('学校所在省份必填.');
+        } else if (!$scope.school.category) {
+            messageDialog('学校类别必填.');
+        } else if (!$scope.school.summary) {
+            messageDialog('学校简介必填.')
+        } else if(!ue.getContent()) {
+            messageDialog('学校详情必填.')
+        } else {
+            $scope.school.description = ue.getContent();
+            $("div.schoolCharacter input.character:checked").each(function(){
+                $scope.school.characterIds += $(this).val() + ',';
+            });
+            $scope.upload = $upload.upload({
+                url: '/school',
+                method: 'PUT',
+                data: $scope.school,
+                file: $scope.school.badge
+            }).success(function(data) {
+                    $scope.school.characterIds = '';
+                    if (data.isSuccess) {
+                        messageDialog('更新成功');
+                    } else if(data.errorMessage) {
+                        messageDialog(data.errorMessage);
+                    } else {
+                        messageDialog('更新失败,请填写正确的内容!!');
+                    }
+                })
+                .error(function(){
+                    messageDialog('更新失败,出错了..Oops..!!');
+                });
+        }
+    }
 }

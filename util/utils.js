@@ -39,19 +39,22 @@ var getFullParentName = exports.getFullParentName = function(model, item, cb){
 };
 
 exports.saveUploadFile = function(req, cb){
-    var fileName = crypto.createHash('md5').update((new Date().getTime()).toString()).digest('hex');
-    var saveFile = imageSavePath + fileName;
-    var savePath = imageSaveFolder + fileName;
-    var tmp_path = req.files.file.path;
-    var is = fs.createReadStream(tmp_path);
-    var os = fs.createWriteStream(saveFile);
-    is.pipe(os);
-    is.on('end',function() {
-        fs.unlinkSync(tmp_path);
-        cb(null, savePath);
-
-    });
-    is.on('error', function(err){
-        cb(err);
-    })
+    if (req.files.file) {
+        var fileName = crypto.createHash('md5').update((new Date().getTime()).toString()).digest('hex');
+        var saveFile = imageSavePath + fileName;
+        var savePath = imageSaveFolder + fileName;
+        var tmp_path = req.files.file.path;
+        var is = fs.createReadStream(tmp_path);
+        var os = fs.createWriteStream(saveFile);
+        is.pipe(os);
+        is.on('end',function() {
+            fs.unlinkSync(tmp_path);
+            cb(null, savePath);
+        });
+        is.on('error', function(err){
+            cb(err);
+        })
+    } else {
+        cb(null, null);
+    }
 };
