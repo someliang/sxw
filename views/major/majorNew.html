@@ -1,0 +1,54 @@
+<div class='row' ng-controller='schoolController'>
+    <p>
+        <button class='btn btn-success' ng-click='create()'>添加</button>
+    </p>
+    <div class='col-xs-12'>
+        <form novalidate class='form-horizontal' name='majorForm' role='form'>
+            <div class='form-group has-error'>
+                <label class='col-sm-3 control-label no-padding-right' for='school'> 学校名称 </label>
+                <div class='col-sm-9'>
+                    <input type='text' readonly ng-model = 'major.school' name='school' id='school' placeholder='学校名称' class='col-xs-10 col-sm-5'/>
+                </div>
+            </div>
+            <div class='form-group has-error'>
+                <label class='col-sm-3 control-label no-padding-right' for='name'> 专业名称 </label>
+                <div class='col-sm-9'>
+                    <input type='text' required ng-model = 'major.name' name='name' id='name' placeholder='专业名称' class='col-xs-10 col-sm-5'/>
+                    <div class='has-error' ng-show='majorForm.name.$dirty && majorForm.name.$invalid'>
+                        <small class='help-block col-xs-12 col-sm-reset inline' ng-show='majorForm.name.$error.required'>
+                            专业名称必填哦.
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class='form-group has-error'>
+                <label class='col-sm-3 control-label no-padding-right' for='category'> 专业类别 </label>
+                <div class='col-sm-9'>
+                    <select class='col-xs-10 col-sm-5' required id='category' ng-model='major.category' ng-options='m.id as m.name for m in categories'>
+                        <option value=''>-- 请选择专业类别 --</option>
+                    </select>
+                </div>
+            </div>
+            <div class='form-group'>
+                <label class='col-sm-3 control-label no-padding-right' for='priority'> 推荐值 </label>
+                <div class='col-sm-9'>
+                    <input type='text' required ng-model = 'major.priority' name='priority' id='priority' placeholder='推荐值' class='col-xs-10 col-sm-5'/>
+                </div>
+            </div>
+            <div class='form-group'>
+                <label class='col-sm-3 control-label no-padding-right' for='science'> 理科 </label>
+                <div class='col-sm-9'>
+                    <input id='science' type='checkbox' ng-model='major.science'/>
+                </div>
+            </div>
+            <div class='form-group has-error'>
+                <label class='col-sm-3 control-label no-padding-right' for='description'> 专业详情 </label>
+                <div style='margin-left: 1%' class='col-sm-6'>
+                    <div id='description' class='row'></div>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+

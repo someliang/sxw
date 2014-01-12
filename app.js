@@ -52,7 +52,9 @@ app.use(orm.express('mysql://root:@127.0.0.1/sxw', {
             province: {type: 'number', rational: true},
             category: {type: 'number', rational: true},
             summary: {type: 'binary'},
-            description: {type: 'binary'}
+            description: {type: 'binary'},
+            priority: {type: 'number', rational: true},
+            popularity: {type: 'number', rational: true}
         });
 
         models.translation2school = db.define('sxw_translation2school', {

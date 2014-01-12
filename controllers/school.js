@@ -79,6 +79,7 @@ exports.schoolCreate = function(req, res){
     var summary = req.body.summary;
     var description = req.body.description;
     var characterIds = req.body.characterIds;
+    var priority = req.body.priority || 0;
     if (!name || !province || !category || !summary || !description || !req.files.file) {
         res.json({isSuccess: false});
     } else {
@@ -104,7 +105,8 @@ exports.schoolCreate = function(req, res){
                             province: province,
                             category: category,
                             summary: summary,
-                            description: description
+                            description: description,
+                            priority: priority
                         }, function(err, item){
                             err && cb(err);
                             cb(null, item);
@@ -122,15 +124,32 @@ exports.schoolCreate = function(req, res){
                             })
                         }, function(err){
                             err && cb(err);
-                            cb(null, null);
+                            cb(null, school);
                         })
                     }
-                ], function(err){
+                ], function(err, result){
                     if (err) {
                         console.error('schoolCreate saving====>' + err.message);
                         return res.json({isSuccess: false});
                     }
-                    res.json({isSuccess: true});
+                    Translation2School.find({sxw_school_id: result.id}).all(function(err, t2ss){
+                        if (err) {
+                            console.error("school read character ====>" + err.message);
+                            res.json({isSuccess: false});
+                        }
+                        var characterIds = [];
+                        async.each(t2ss, function(character, callback){
+                            characterIds.push(character.sxw_translation_id);
+                            callback();
+                        }, function(err){
+                            if (err) {
+                                console.error("school read character ====>" + err.message);
+                                res.json({isSuccess: false});
+                            }
+                            result.characters = characterIds;
+                            res.json({isSuccess: true, item: result});
+                        })
+                    });
                 })
             } else {
                 res.json({isSuccess: false, errorMessage: '所填写的学校名称已存在,请核对后再填写.'});
@@ -187,6 +206,7 @@ exports.schoolUpdate = function(req, res){
     var summary = req.body.summary;
     var description = req.body.description;
     var characterIds = req.body.characterIds;
+    var priority = req.body.priority || 0;
     if (!name || !province || !category || !summary || !description || !id) {
         res.json({isSuccess: false});
     } else {
@@ -215,7 +235,8 @@ exports.schoolUpdate = function(req, res){
                                     province: province,
                                     category: category,
                                     summary: summary,
-                                    description: description
+                                    description: description,
+                                    priority: priority
                                 }, function(err){
                                     err && cb(err);
                                     cb(null, null);
@@ -226,7 +247,8 @@ exports.schoolUpdate = function(req, res){
                                     province: province,
                                     category: category,
                                     summary: summary,
-                                    description: description
+                                    description: description,
+                                    priority: priority
                                 }, function(err){
                                     err && cb(err);
                                     cb(null, null);
@@ -288,4 +310,8 @@ exports.schoolDelete = function(req, res){
             });
         })
     }
+};
+
+exports.majorCreate = function(req, res){
+    res.render('major/majorNew');
 };

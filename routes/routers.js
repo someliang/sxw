@@ -40,6 +40,9 @@ module.exports = function (app) {
     app.get('/getProvinces', translation.getProvinces);
     app.get('/getSchoolCategories', translation.getSchoolCategories);
     app.get('/getSchoolCharacters', translation.getSchoolCharacters);
+    app.get('/getMajorCategories', translation.getMajorCategories);
+
+
 
     //school
     app.get('/school/new', school.schoolNew);
@@ -51,6 +54,8 @@ module.exports = function (app) {
     app.put('/school', school.schoolUpdate);
     app.delete('/school', school.schoolDelete);
 
+    //major
+    app.get('/school/major/new', school.majorCreate);
 
 
     //translation url

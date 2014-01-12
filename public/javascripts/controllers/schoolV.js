@@ -25,6 +25,10 @@ app.config(['$routeProvider', function ($routeProvider) {
             controller: schoolVUpdate,
             templateUrl: '/school/update'
         })
+        .when('/school/major/new', {
+            controller: majorVNew,
+            templateUrl: '/school/major/new'
+        })
 }]);
 
 function getProvinces($http, cb){
@@ -81,6 +85,25 @@ function getSchoolCharacters($http, cb){
         })
 }
 
+function getMajorCategories($http, cb){
+    $http({
+        method: 'GET',
+        url: '/getMajorCategories',
+        'Content-Type': 'application/json'
+    }).success(function(data){
+            if (data.isSuccess) {
+                cb(data.items);
+            } else if (data.errorMessage) {
+                messageDialog(data.errorMessage)
+            } else {
+                messageDialog('获取专业类别出错了,请重新尝试.')
+            }
+        }).error(function(){
+            messageDialog('获取专业类别出错了,请重新尝试.')
+        })
+}
+
+
 function schoolVNew($scope, $http, $upload){
     initFileInput('#badge', true);
     var ue = new UE.ui.Editor();
@@ -124,28 +147,31 @@ function schoolVNew($scope, $http, $upload){
             $("div.schoolCharacter input.character:checked").each(function(){
                 $scope.school.characterIds += $(this).val() + ',';
             });
-            $scope.upload = $upload.upload({
-                url: '/school',
-                method: 'POST',
-                data: $scope.school,
-                file: $scope.school.badge
-            }).success(function(data) {
-                    $scope.school.characterIds = '';
-                    if (data.isSuccess) {
-                        messageDialog('添加成功');
-                    } else if(data.errorMessage) {
-                        messageDialog(data.errorMessage);
-                    } else {
-                        messageDialog('添加失败,请填写正确的内容!!');
-                    }
-                })
-                .error(function(){
-                    messageDialog('添加失败,出错了..Oops..!!');
-                });
+            if ($scope.school.priority && !parseInt($scope.school.priority)){
+                messageDialog('推荐值必须是整数.')
+            } else {
+                $scope.upload = $upload.upload({
+                    url: '/school',
+                    method: 'POST',
+                    data: $scope.school,
+                    file: $scope.school.badge
+                }).success(function(data) {
+                        $scope.school.characterIds = '';
+                        if (data.isSuccess) {
+                            item = data.item;
+                            location.href = '#/school/major/new';
+                        } else if(data.errorMessage) {
+                            messageDialog(data.errorMessage);
+                        } else {
+                            messageDialog('添加失败,请填写正确的内容!!');
+                        }
+                    })
+                    .error(function(){
+                        messageDialog('添加失败,出错了..Oops..!!');
+                    });
+            }
         }
     }
-
-
 }
 
 function schoolVList($scope, $http){
@@ -153,12 +179,13 @@ function schoolVList($scope, $http){
     jqgridConfig.id = 'schoolList';
     jqgridConfig.pager = 'schoolPager';
     jqgridConfig.url = '/schools';
-    jqgridConfig.colNames =  ['ID', '学校名称', '学校所属省份', '学校类别', '校徽', '学校简介'];
+    jqgridConfig.colNames =  ['ID', '学校名称', '学校所属省份', '学校类别', '推荐值', '校徽', '学校简介'];
     jqgridConfig.colModel = [
         {name: 'id', index: 'id', width: 25},
         {name: 'name', index: 'name', editable: true, editrules: {required: true}, width: 30},
         {name: 'province', index: 'province', editable: true, editrules: {required: true}, width: 30},
         {name: 'category', index: 'category', editable: true, editrules: {required: true}, width: 30},
+        {name: 'priority', index: 'priority', editable: true, editrules: {required: true}, width: 30},
         {name: 'badge', index: 'badge', search: false, formatter: imageFormat, editable: true, width: 42},
         {name: 'summary', index: 'summary', editable: true, editrules: {required: true}, width: 30}
     ];
@@ -274,6 +301,48 @@ function schoolVUpdate($scope, $http, $upload){
                 .error(function(){
                     messageDialog('更新失败,出错了..Oops..!!');
                 });
+        }
+    }
+}
+
+
+function majorVNew($scope, $http){
+    if (!item) {
+        messageDialog('亲,你还没选择要修改的内容呢!!');
+        return;
+    } else {
+        $scope.major = {};
+        $scope.major.school = item.name;
+    }
+    var ue = new UE.ui.Editor();
+    ue.render('description');
+
+    getMajorCategories($http, function(items){
+        $scope.categories = items;
+    });
+
+    $scope.create = function(){
+        if (!$scope.major.name) {
+            messageDialog('请输入专业名称.');
+        } else if (!$scope.major.category) {
+            messageDialog('请选择专业类别称.');
+        } else {
+            $scope.major.description = ue.getContent();
+
+            if ($scope.major.priority && !parseInt($scope.major.priority)){
+                messageDialog('推荐值必须是整数.')
+            } else {
+                $http({
+                    method: 'POST',
+                    url: '/school/major',
+                    data: $scope.major,
+                    'Content-Type': 'application/json'
+                }).success(function(data){
+
+                    }).error(function(){
+                        messageDialog('添加专业出错了,专业失败.');
+                    })
+            }
         }
     }
 }

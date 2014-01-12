@@ -30,13 +30,15 @@ CREATE  TABLE IF NOT EXISTS `sxw`.`sxw_school` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   `badge` VARCHAR(255) NULL ,
   `province` INT NOT NULL DEFAULT 0 ,
-  `category` INT NOT NULL DEFAULT 0 COMMENT '综合   理工   农林   医药   师范   语言   财经   政法   体育   艺术   民族   军事   其他  ' ,
+  `category` INT NOT NULL DEFAULT 0 ,
   `description` TEXT NOT NULL ,
   `summary` TEXT NULL ,
+  `character` INT NOT NULL DEFAULT 0 ,
   `createdTime` TIMESTAMP NULL DEFAULT now() ,
   `name` VARCHAR(255) NOT NULL ,
-  PRIMARY KEY (`id`) ,
-  UNIQUE INDEX `name_UNIQUE` (`name` ASC) )
+  `popularity` INT NULL DEFAULT 0 ,
+  `priority` INT NOT NULL DEFAULT 0 ,
+  PRIMARY KEY (`id`) )
 ENGINE = InnoDB
 COMMENT = '学校';
 
@@ -95,6 +97,8 @@ CREATE  TABLE IF NOT EXISTS `sxw`.`sxw_major` (
   `sxw_school_id` INT NOT NULL ,
   `name` VARCHAR(255) NOT NULL ,
   `science` TINYINT(1) NOT NULL DEFAULT 1 ,
+  `priority` INT NOT NULL DEFAULT 0 ,
+  `popularity` INT NULL ,
   PRIMARY KEY (`id`) ,
   INDEX `fk_sxw_major_sxw_school1_idx` (`sxw_school_id` ASC) ,
   CONSTRAINT `fk_sxw_major_sxw_school1`
@@ -129,32 +133,6 @@ CREATE  TABLE IF NOT EXISTS `sxw`.`sxw_major_detail` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
 COMMENT = '专业详情';
-
-
--- -----------------------------------------------------
--- Table `sxw`.`sxw_translation2school`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `sxw`.`sxw_translation2school` ;
-
-CREATE  TABLE IF NOT EXISTS `sxw`.`sxw_translation2school` (
-  `sxw_translation_id` INT NOT NULL ,
-  `sxw_school_id` INT NOT NULL ,
-  `id` INT NOT NULL AUTO_INCREMENT ,
-  INDEX `fk_sxw_translation_has_sxw_school_sxw_school1_idx` (`sxw_school_id` ASC) ,
-  INDEX `fk_sxw_translation_has_sxw_school_sxw_translation1_idx` (`sxw_translation_id` ASC) ,
-  PRIMARY KEY (`id`) ,
-  CONSTRAINT `fk_sxw_translation_has_sxw_school_sxw_translation1`
-    FOREIGN KEY (`sxw_translation_id` )
-    REFERENCES `sxw`.`sxw_translation` (`id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_sxw_translation_has_sxw_school_sxw_school1`
-    FOREIGN KEY (`sxw_school_id` )
-    REFERENCES `sxw`.`sxw_school` (`id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB
-COMMENT = '学校特征，例如985工程   211工程   教育部直属   中央部委   自主招生试点  等';
 
 USE `sxw` ;
 

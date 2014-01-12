@@ -59,9 +59,15 @@
                     </label>
                 </div>
             </div>
-            <div class='form-group has-error'>
-                <label class='col-sm-1 control-label no-padding-right' for='description'> 学校详情 </label>
+            <div class='form-group'>
+                <label class='col-sm-3 control-label no-padding-right' for='name'> 推荐值 </label>
                 <div class='col-sm-9'>
+                    <input type='text' required ng-model = 'school.priority' name='priority' id='priority' placeholder='推荐值' class='col-xs-10 col-sm-5'/>
+                </div>
+            </div>
+            <div class='form-group has-error'>
+                <label class='col-sm-3 control-label no-padding-right' for='description'> 学校详情 </label>
+                <div style="margin-left: 1%" class='col-sm-6'>
                     <div id='description' class='row'></div>
                 </div>
             </div>

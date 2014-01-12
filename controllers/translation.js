@@ -343,5 +343,14 @@ exports.getSchoolCharacters = function(req, res) {
         }
         res.json({isSuccess: true, items: items});
     })
+};
 
+exports.getMajorCategories = function(req, res){
+    getTranslationByFlag(req, 'majorcategory', function(err, items){
+        if (err) {
+            console.error("getSchoolCharacters ====>" + err.message);
+            return res.json({isSuccess: false});
+        }
+        res.json({isSuccess: true, items: items});
+    })
 };
