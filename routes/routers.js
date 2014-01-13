@@ -36,6 +36,8 @@ module.exports = function (app) {
     //basic
     app.get('/', index.index);
     app.get('/getTranslationSelectStyle', translation.getTranslationSelectStyle);
+    app.get('/getLocationSelectStyle', translation.getLocationSelectStyle);
+    app.get('/getVintages', translation.getVintages);
     app.get('/getCategory', translation.getCategory);
     app.get('/getProvinces', translation.getProvinces);
     app.get('/getSchoolCategories', translation.getSchoolCategories);
@@ -47,6 +49,7 @@ module.exports = function (app) {
     //school
     app.get('/school/new', school.schoolNew);
     app.get('/school/list', school.schoolList);
+    app.get('/schoolDetails', school.schoolDetails);
     app.get('/school/update', school.schoolUpdateForm);
     app.get('/schools', school.schools);
     app.post('/school', school.schoolCreate);

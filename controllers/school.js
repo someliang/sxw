@@ -70,6 +70,9 @@ exports.schoolUpdateForm = function(req, res){
     res.render('school/schoolUpdate');
 };
 
+exports.schoolDetails = function(req, res){
+    res.json({rows: ''});
+};
 
 
 exports.schoolCreate = function(req, res){

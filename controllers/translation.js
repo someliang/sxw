@@ -11,7 +11,8 @@ var logger = require('../app').logger('translation')
     , url = require('url')
     , querystring = require('querystring')
     , orm = require('orm')
-    , util = require('../util/utils');
+    , util = require('../util/utils')
+    , moment = require('moment');
 
 
 exports.getTranslations = function(req, res){
@@ -36,6 +37,30 @@ exports.getTranslationSelectStyle = function(req, res){
         res.render('translation/translationSelectStyle', {translations: translations});
     })
 };
+
+exports.getLocationSelectStyle = function(req, res){
+    getTranslationByFlag(req, 'province', function(err, translations){
+        if (err) {
+            console.error("getLocationSelectStyle ====>" + err.message);
+            return res.json({isSuccess: false});
+        }
+        res.render('translation/translationSelectStyle', {translations: translations});
+    })
+};
+
+exports.getVintages = function(req, res){
+    var currentYear = moment().format("YYYY");
+    var end = currentYear - 50;
+    var items = [];
+    for(var i=currentYear; i > end; i--) {
+        var item = {};
+        item.id = i;
+        item.name = i;
+        items.push(item);
+    }
+    res.json({isSuccess: true, items: items});
+};
+
 
 exports.translationNew = function(req, res){
     var Translation = req.models.translation;

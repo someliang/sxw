@@ -1,5 +1,5 @@
 <select>
     {%for translation in translations %}
-        <option value='{{translation.id}}'>{{translation.name}}</option>
+        <option value='{{translation.id}}' label="{{translation.name}}">{{translation.name}}</option>
     {% endfor %}
 </select>

@@ -49,6 +49,24 @@ function getProvinces($http, cb){
         })
 }
 
+function getVintages($http, cb){
+    $http({
+        method: 'GET',
+        url: '/getVintages',
+        'Content-Type': 'application/json'
+    }).success(function(data){
+            if (data.isSuccess) {
+                cb(data.items);
+            } else if (data.errorMessage) {
+                messageDialog(data.errorMessage)
+            } else {
+                messageDialog('获取年份信息出错了,请重新尝试.')
+            }
+        }).error(function(){
+            messageDialog('获取年份信息出错了,请重新尝试.')
+        })
+}
+
 function getSchoolCategories($http, cb){
     $http({
         method: 'GET',
@@ -121,14 +139,30 @@ function schoolVNew($scope, $http, $upload){
 
     getProvinces($http, function(items){
         $scope.provinces = items;
-
     });
+
+    getVintages($http, function(items){
+        $scope.vintages = items;
+    });
+
+
     getSchoolCategories($http, function(items){
         $scope.categories = items;
     });
     getSchoolCharacters($http, function(items){
         $scope.characters = items;
     });
+
+    $scope.details = [];
+    $scope.addDetail = function(){
+        $scope.details.push({});
+    };
+
+    $scope.deleteDetail = function(index){
+        $scope.details.splice(index, 1);
+    };
+    $scope.inputDetails = [];
+
     $scope.create = function(){
         if (!$scope.school.name) {
             messageDialog('学校名称必填.');
@@ -144,30 +178,92 @@ function schoolVNew($scope, $http, $upload){
             messageDialog('学校详情必填.')
         } else {
             $scope.school.description = ue.getContent();
-            $("div.schoolCharacter input.character:checked").each(function(){
+            $('div.schoolCharacter input.character:checked').each(function(){
                 $scope.school.characterIds += $(this).val() + ',';
             });
+
+            var flag = true;
             if ($scope.school.priority && !parseInt($scope.school.priority)){
                 messageDialog('推荐值必须是整数.')
             } else {
-                $scope.upload = $upload.upload({
-                    url: '/school',
-                    method: 'POST',
-                    data: $scope.school,
-                    file: $scope.school.badge
-                }).success(function(data) {
-                        $scope.school.characterIds = '';
-                        if (data.isSuccess) {
-                            item = data.item;
-                            location.href = '#/school/major/new';
-                        } else if(data.errorMessage) {
-                            messageDialog(data.errorMessage);
+                $('tr.detail').each(function(){
+                    var vintageIndex = $(this).find('select.vintage').val();
+                    var locationIndex = $(this).find('select.location').val();
+                    var grade = $(this).find('input.grade').val();
+                    var shift = $(this).find('input.shift').val();
+                    var admission = $(this).find('input.admission').val();
+                    var average = $(this).find('input.average').val();
+                    var science = $(this).find('input.science:checked').val() && 1 || 0 ;
+                    var vintage = '';
+                    if (vintageIndex) {
+                        vintage = $scope.vintages[vintageIndex].name ;
+                    }
+                    var location = '' ;
+                    if(locationIndex) {
+                        location = $scope.provinces[locationIndex].id;
+                    }
+
+                    if (!vintage && !location && !grade && !shift && !admission && !average) {
+                        return;
+                    } else {
+                        if (!vintage) {
+                            return messageDialog('招生年份必填.');
+                        } else if (!location){
+                            flag = false;
+                            return messageDialog('招生地区必填.')
+                        } else if(!grade) {
+                            flag = false;
+                            return messageDialog('招生批次必填.')
+                        } else if(!shift) {
+                            flag = false;
+                            return messageDialog('调档线必填.')
+                        } else if (shift && !parseInt(shift)){
+                            return messageDialog('调档线必须是整数.')
+                        } else if(!admission)  {
+                            flag = false;
+                            return messageDialog('实录线必填.')
+                        } else if (admission && !parseInt(admission)){
+                            flag = false;
+                            return messageDialog('实录线必须是整数.')
+                        } else if (!average) {
+                            flag = false;
+                            return messageDialog('平均线必填.')
+                        } else if (average && !parseInt(average)){
+                            flag = false;
+                            return messageDialog('平均线必须是整数.')
                         } else {
-                            messageDialog('添加失败,请填写正确的内容!!');
+                            var detail =  {};
+                            detail.vintage = vintage;
+                            detail.location = location;
+                            detail.grade = grade;
+                            detail.shift = shift;
+                            detail.admission = admission;
+                            detail.average = average;
+                            detail.science = science;
+                            $scope.inputDetails.push(detail);
                         }
-                    })
-                    .error(function(){
-                        messageDialog('添加失败,出错了..Oops..!!');
+                    }
+                }).promise().done(function(){
+                        $scope.school.details = $scope.inputDetails;
+                        $scope.upload = $upload.upload({
+                            url: '/schoolssss',
+                            method: 'POST',
+                            data: $scope.school,
+                            file: $scope.school.badge
+                        }).success(function(data) {
+                                $scope.school.characterIds = '';
+                                if (data.isSuccess) {
+                                    item = data.item;
+                                    location.href = '#/school/major/new';
+                                } else if(data.errorMessage) {
+                                    messageDialog(data.errorMessage);
+                                } else {
+                                    messageDialog('添加失败,请填写正确的内容!!');
+                                }
+                            })
+                            .error(function(){
+                                messageDialog('添加失败,出错了..Oops..!!');
+                            });
                     });
             }
         }
@@ -200,6 +296,8 @@ function schoolVList($scope, $http){
     navigatorConfig.view = true;
     navigatorConfig.refresh = true;
     navigationFunction('schoolList', 'schoolPager', navigatorConfig);
+
+
 
     $scope.update = function() {
         var rs = $('#schoolList').jqGrid('getGridParam','selarrrow');
@@ -242,7 +340,7 @@ function schoolVUpdate($scope, $http, $upload){
         $scope.school = item;
         $scope.imagePath = item.badge;
     }
-    ue.addListener("ready", function () {
+    ue.addListener('ready', function () {
         ue.setContent(item.description);
     });
 
@@ -280,7 +378,7 @@ function schoolVUpdate($scope, $http, $upload){
             messageDialog('学校详情必填.')
         } else {
             $scope.school.description = ue.getContent();
-            $("div.schoolCharacter input.character:checked").each(function(){
+            $('div.schoolCharacter input.character:checked').each(function(){
                 $scope.school.characterIds += $(this).val() + ',';
             });
             $scope.upload = $upload.upload({
