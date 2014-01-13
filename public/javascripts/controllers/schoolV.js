@@ -121,6 +121,12 @@ function getMajorCategories($http, cb){
         })
 }
 
+function getDetails($scope, cb){
+    var details = [];
+    var count = 0;
+    var length = $('tr.detail').length;
+
+}
 
 function schoolVNew($scope, $http, $upload){
     initFileInput('#badge', true);
@@ -161,7 +167,6 @@ function schoolVNew($scope, $http, $upload){
     $scope.deleteDetail = function(index){
         $scope.details.splice(index, 1);
     };
-    $scope.inputDetails = [];
 
     $scope.create = function(){
         if (!$scope.school.name) {
@@ -181,12 +186,13 @@ function schoolVNew($scope, $http, $upload){
             $('div.schoolCharacter input.character:checked').each(function(){
                 $scope.school.characterIds += $(this).val() + ',';
             });
-
-            var flag = true;
             if ($scope.school.priority && !parseInt($scope.school.priority)){
                 messageDialog('推荐值必须是整数.')
             } else {
+                var details = [];
+                var flag = true;
                 $('tr.detail').each(function(){
+                    console.log('11111111');
                     var vintageIndex = $(this).find('select.vintage').val();
                     var locationIndex = $(this).find('select.location').val();
                     var grade = $(this).find('input.grade').val();
@@ -204,33 +210,35 @@ function schoolVNew($scope, $http, $upload){
                     }
 
                     if (!vintage && !location && !grade && !shift && !admission && !average) {
-                        return;
+                        return true;
                     } else {
                         if (!vintage) {
-                            return messageDialog('招生年份必填.');
+                            flag = false;
+                            messageDialog('招生年份必填.');
                         } else if (!location){
                             flag = false;
-                            return messageDialog('招生地区必填.')
+                            messageDialog('招生地区必填.');
                         } else if(!grade) {
                             flag = false;
-                            return messageDialog('招生批次必填.')
+                            messageDialog('招生批次必填.');
                         } else if(!shift) {
                             flag = false;
-                            return messageDialog('调档线必填.')
+                            messageDialog('调档线必填.');
                         } else if (shift && !parseInt(shift)){
-                            return messageDialog('调档线必须是整数.')
+                            flag = false;
+                            messageDialog('调档线必须是整数.');
                         } else if(!admission)  {
                             flag = false;
-                            return messageDialog('实录线必填.')
+                            messageDialog('实录线必填.');
                         } else if (admission && !parseInt(admission)){
                             flag = false;
-                            return messageDialog('实录线必须是整数.')
+                            messageDialog('实录线必须是整数.');
                         } else if (!average) {
                             flag = false;
-                            return messageDialog('平均线必填.')
+                            messageDialog('平均线必填.');
                         } else if (average && !parseInt(average)){
                             flag = false;
-                            return messageDialog('平均线必须是整数.')
+                            messageDialog('平均线必须是整数.');
                         } else {
                             var detail =  {};
                             detail.vintage = vintage;
@@ -240,31 +248,34 @@ function schoolVNew($scope, $http, $upload){
                             detail.admission = admission;
                             detail.average = average;
                             detail.science = science;
-                            $scope.inputDetails.push(detail);
+                            details.push(detail);
                         }
                     }
-                }).promise().done(function(){
-                        $scope.school.details = $scope.inputDetails;
-                        $scope.upload = $upload.upload({
-                            url: '/schoolssss',
-                            method: 'POST',
-                            data: $scope.school,
-                            file: $scope.school.badge
-                        }).success(function(data) {
-                                $scope.school.characterIds = '';
-                                if (data.isSuccess) {
-                                    item = data.item;
-                                    location.href = '#/school/major/new';
-                                } else if(data.errorMessage) {
-                                    messageDialog(data.errorMessage);
-                                } else {
-                                    messageDialog('添加失败,请填写正确的内容!!');
-                                }
-                            })
-                            .error(function(){
-                                messageDialog('添加失败,出错了..Oops..!!');
-                            });
-                    });
+                });
+                if (flag) {
+                    $scope.details = details;
+                    $scope.upload = $upload.upload({
+                        url: '/schoolssss',
+                        method: 'POST',
+                        data: $scope.school,
+                        file: $scope.school.badge
+                    }).success(function(data) {
+                            $scope.school.characterIds = '';
+                            if (data.isSuccess) {
+                                item = data.item;
+                                location.href = '#/school/major/new';
+                            } else if(data.errorMessage) {
+                                messageDialog(data.errorMessage);
+                            } else {
+                                messageDialog('添加失败,请填写正确的内容!!');
+                            }
+                        })
+                        .error(function(){
+                            messageDialog('添加失败,出错了..Oops..!!');
+                        });
+                } else {
+                    return false;
+                }
             }
         }
     }
