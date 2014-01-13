@@ -91,7 +91,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr class='detail' ng-repeat="detail in details">
+                        <tr class='detail' ng-repeat="detail in detailForms">
                             <td>
                                 <select required ng-model='detail.vintage' class = 'vintage' ng-options='m.id as m.name for m in vintages'>
                                     <option value=''>-- 请选择招生年份 --</option>
@@ -102,8 +102,10 @@
                                     <option value=''>-- 请选择招生地区 --</option>
                                 </select>
                             </td>
-                            <td class="hidden-480">
-                                <input type="text" ng-model="detail.grade" class='grade' placeholder='招生批次'/>
+                            <td>
+                                <select required ng-model='detail.grade' class= 'grade' ng-options='m.id as m.name for m in grades'>
+                                    <option value=''>-- 请选择招生批次 --</option>
+                                </select>
                             </td>
                             <td>
                                 <input type="text" required ng-model="detail.shift" class='shift' placeholder='调档线'/>

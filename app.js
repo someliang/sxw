@@ -11,7 +11,8 @@ var express = require('express')
     , passport = require('passport')
     , LocalStrategy = require('passport-local').Strategy
     , flash = require('connect-flash')
-    , crypto = require('crypto');
+    , crypto = require('crypto')
+    , cluster = require('cluster');
 
 var app = express();
 
@@ -56,6 +57,38 @@ app.use(orm.express('mysql://root:@127.0.0.1/sxw', {
             priority: {type: 'number', rational: true},
             popularity: {type: 'number', rational: true}
         });
+
+        models.schoolDetail = db.define('sxw_school_detail', {
+            location: {type: 'number', rational: true},
+            vintage: {type: 'date'},
+            grade: {type: 'number', rational: true},
+            shift: {type: 'number', rational: true},
+            admission: {type: 'number', rational: true},
+            average: {type: 'number', rational: true},
+            science: {type: 'boolean'},
+            sxw_school_id: {type: 'number', rational: true}
+        });
+
+        models.major = db.define('sxw_major', {
+            name: {type: 'text'},
+            category: {type: 'number', rational: true},
+            description: {type: 'binary'},
+            priority: {type: 'number', rational: true},
+            popularity: {type: 'number', rational: true},
+            sxw_school_id: {type: 'number', rational: true},
+            science: {type: 'boolean'}
+        });
+
+        models.majorDetail = db.define('sxw_major_detail', {
+            location: {type: 'number', rational: true},
+            vintage: {type: 'date'},
+            grade: {type: 'number', rational: true},
+            shift: {type: 'number', rational: true},
+            admission: {type: 'number', rational: true},
+            average: {type: 'number', rational: true},
+            sxw_major_id: {type: 'number', rational: true}
+        });
+
 
         models.translation2school = db.define('sxw_translation2school', {
             sxw_translation_id: {type: 'number', rational: true},
@@ -139,16 +172,27 @@ app.configure(function() {
     routes(app);
 });
 
-
-
-
 // development only
 if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-http.createServer(app).listen(app.get('port'), function(){
-    console.log('oh,god..Oops..!!');
-    console.log('god bless sxw!!!!');
-    console.log('god bless sxw on port ' + app.get('port'));
-});
+if (cluster.isMaster) {
+    require('os').cpus().forEach(function () {
+        cluster.fork();
+    });
+    cluster.on('exit', function (worker, code, signal) {
+        console.log('worker ' + worker.process.pid + ' died');
+    });
+    cluster.on('listening', function (worker, address) {
+        console.log("A worker with #" + worker.id + " is now connected to " +
+            address.address +
+            ":" + address.port);
+    });
+} else {
+    http.createServer(app).listen(app.get('port'), function(){
+        console.log('oh,god..Oops..!!');
+        console.log('god bless sxw!!!!');
+        console.log('god bless sxw on port ' + app.get('port'));
+    });
+}

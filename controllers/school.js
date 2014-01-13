@@ -9,7 +9,8 @@
 var async = require('async')
     , util = require('../util/utils')
     , url = require('url')
-    , queryString = require('querystring');
+    , queryString = require('querystring')
+    , moment = require('moment');
 
 
 function getTranslationName(req, id, cb){
@@ -74,6 +75,31 @@ exports.schoolDetails = function(req, res){
     res.json({rows: ''});
 };
 
+function deleteSchoolInfo(req, id){
+    var School = req.models.school;
+    var Translation2School = req.models.translation2school;
+    async.waterfall([
+        function(cb){
+            Translation2School.find({sxw_school_id: id}).remove(function(err){
+                if (err)
+                    console.error('translation 2 school delete ====>' + err.message);
+                cb();
+            })
+        },
+        function(t2s, cb){
+            School.find({id: id}).remove(function(err){
+                if (err)
+                    console.error('Schooldelete ====>' + err.message);
+                cb();
+            })
+        }
+    ], function(err){
+        if (err)
+            console.error('delete school info ====>' + err.message);
+        console.log('delete school info success');
+    })
+}
+
 
 exports.schoolCreate = function(req, res){
     var name = req.body.name.trim();
@@ -82,12 +108,14 @@ exports.schoolCreate = function(req, res){
     var summary = req.body.summary;
     var description = req.body.description;
     var characterIds = req.body.characterIds;
+    var details = req.body.details && JSON.parse(req.body.details);
     var priority = req.body.priority || 0;
     if (!name || !province || !category || !summary || !description || !req.files.file) {
         res.json({isSuccess: false});
     } else {
         var School = req.models.school;
         var Translation2School = req.models.translation2school;
+        var SchoolDetail = req.models.schoolDetail;
         School.find({name: name}).count(function(err, count){
             if (err) {
                 console.error('schoolCreate school count====>' + err.message);
@@ -111,7 +139,10 @@ exports.schoolCreate = function(req, res){
                             description: description,
                             priority: priority
                         }, function(err, item){
-                            err && cb(err);
+                            if (err) {
+                                console.error('school creating ====>' + err.message);
+                                cb(err);
+                            }
                             cb(null, item);
                         })
                     },
@@ -129,6 +160,37 @@ exports.schoolCreate = function(req, res){
                             err && cb(err);
                             cb(null, school);
                         })
+                    },
+                    function(school, cb){
+                        try{
+                            async.each(details, function(detail, callback){
+                                SchoolDetail.create({
+                                    location: detail.location,
+                                    vintage: new Date(detail.vintage, 0, 1),
+                                    grade: detail.grade,
+                                    shift: detail.shift,
+                                    admission: detail.admission,
+                                    average: detail.average,
+                                    science: detail.science,
+                                    sxw_school_id: school.id
+                                }, function(err, item){
+                                    if (err) {
+                                        console.error("school create details ====>" + err.message);
+                                        cb(err);
+                                    }
+                                    callback();
+                                })
+                            }, function(err){
+                                if (err) {
+                                    console.error('school create  details async ====>' + err.message);
+                                    cb(err);
+                                }
+                                cb(null, school);
+                            })
+                        }catch(e){
+                            deleteSchoolInfo(req, school.id);
+                            cb(e);
+                        }
                     }
                 ], function(err, result){
                     if (err) {
@@ -315,6 +377,82 @@ exports.schoolDelete = function(req, res){
     }
 };
 
-exports.majorCreate = function(req, res){
+exports.majorNew = function(req, res){
     res.render('major/majorNew');
+};
+
+exports.majorCreate = function(req, res){
+    var id = req.body.schoolId;
+    var name = req.body.name;
+    var category = req.body.category;
+    var priority = req.body.priority;
+    var description = req.body.description;
+    var details = req.body.details;
+    var science = req.body.science && 1 || 0;
+    if (!id || !name || !category || !description) {
+        res.json({isSuccess: false});
+    } else {
+        var Major = req.models.major;
+        var MajorDetail = req.models.majorDetail;
+        Major.find({name: name, sxw_school_id: id}).count(function(err, count){
+            if (err) {
+                console.error('major creaet ====>' + err.message);
+                return res.json({isSuccess: false});
+            }
+            if (count ===0) {
+                async.waterfall([
+                    function(cb){
+                        Major.create({
+                            category: category,
+                            description: description,
+                            sxw_school_id: id,
+                            name: name,
+                            science: science,
+                            priority: priority
+                        }, function(err, item){
+                            if (err) {
+                                console.error('major Create ====>' + err.message);
+                                cb(err);
+                            }
+                            cb(null, item);
+                        })
+                    },
+                    function(major, cb){
+                        async.each(details, function(detail, callback){
+                            MajorDetail.create({
+                                vintage: new Date(detail.vintage, 0, 1),
+                                location: detail.location,
+                                grade: detail.grade,
+                                shift: detail.shift,
+                                admission: detail.admission,
+                                average: detail.average,
+                                sxw_major_id: major.id
+                            }, function(err){
+                                if (err) {
+                                    console.error('major detail create ====>' + err.message);
+                                    cb(err);
+                                }
+                                callback();
+                            })
+                        }, function(err){
+                            if (err) {
+                                console.error('major detail creating ====>' + err.message);
+                                cb(err);
+                            }
+                            cb();
+                        })
+                    }
+
+                ], function(err){
+                    if (err) {
+                        console.error('major creaet ====>' + err.message);
+                        return res.json({isSuccess: false});
+                    }
+                    res.json({isSuccess: true});
+                })
+            } else {
+                res.json({isSuccess: false, errorMessage: '专业名称已存在'})
+            }
+        })
+    }
 };

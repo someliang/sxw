@@ -121,11 +121,22 @@ function getMajorCategories($http, cb){
         })
 }
 
-function getDetails($scope, cb){
-    var details = [];
-    var count = 0;
-    var length = $('tr.detail').length;
-
+function getGrades($http, cb){
+    $http({
+        method: 'GET',
+        url: '/getGrades',
+        'Content-Type': 'application/json'
+    }).success(function(data){
+            if (data.isSuccess) {
+                cb(data.items);
+            } else if (data.errorMessage) {
+                messageDialog(data.errorMessage)
+            } else {
+                messageDialog('获取录取批次类别出错了,请重新尝试.')
+            }
+        }).error(function(){
+            messageDialog('获取录取批次别出错了,请重新尝试.')
+        })
 }
 
 function schoolVNew($scope, $http, $upload){
@@ -151,6 +162,9 @@ function schoolVNew($scope, $http, $upload){
         $scope.vintages = items;
     });
 
+    getGrades($http, function(items){
+        $scope.grades = items;
+    });
 
     getSchoolCategories($http, function(items){
         $scope.categories = items;
@@ -159,15 +173,13 @@ function schoolVNew($scope, $http, $upload){
         $scope.characters = items;
     });
 
-    $scope.details = [];
+    $scope.detailForms = [];
     $scope.addDetail = function(){
-        $scope.details.push({});
+        $scope.detailForms.push({});
     };
-
     $scope.deleteDetail = function(index){
-        $scope.details.splice(index, 1);
+        $scope.detailForms.splice(index, 1);
     };
-
     $scope.create = function(){
         if (!$scope.school.name) {
             messageDialog('学校名称必填.');
@@ -192,10 +204,9 @@ function schoolVNew($scope, $http, $upload){
                 var details = [];
                 var flag = true;
                 $('tr.detail').each(function(){
-                    console.log('11111111');
                     var vintageIndex = $(this).find('select.vintage').val();
                     var locationIndex = $(this).find('select.location').val();
-                    var grade = $(this).find('input.grade').val();
+                    var grade = $(this).find('select.grade').val();
                     var shift = $(this).find('input.shift').val();
                     var admission = $(this).find('input.admission').val();
                     var average = $(this).find('input.average').val();
@@ -253,9 +264,9 @@ function schoolVNew($scope, $http, $upload){
                     }
                 });
                 if (flag) {
-                    $scope.details = details;
+                    $scope.school.details = details;
                     $scope.upload = $upload.upload({
-                        url: '/schoolssss',
+                        url: '/school',
                         method: 'POST',
                         data: $scope.school,
                         file: $scope.school.badge
@@ -422,6 +433,7 @@ function majorVNew($scope, $http){
     } else {
         $scope.major = {};
         $scope.major.school = item.name;
+        $scope.major.schoolId = item.id;
     }
     var ue = new UE.ui.Editor();
     ue.render('description');
@@ -430,6 +442,27 @@ function majorVNew($scope, $http){
         $scope.categories = items;
     });
 
+    getProvinces($http, function(items){
+        $scope.provinces = items;
+    });
+
+    getVintages($http, function(items){
+        $scope.vintages = items;
+    });
+
+    getGrades($http, function(items){
+        $scope.grades = items;
+    });
+
+    $scope.detailForms = [];
+    $scope.addDetail = function(){
+        $scope.detailForms.push({});
+    };
+    $scope.deleteDetail = function(index){
+        $scope.detailForms.splice(index, 1);
+    };
+
+
     $scope.create = function(){
         if (!$scope.major.name) {
             messageDialog('请输入专业名称.');
@@ -437,20 +470,90 @@ function majorVNew($scope, $http){
             messageDialog('请选择专业类别称.');
         } else {
             $scope.major.description = ue.getContent();
-
             if ($scope.major.priority && !parseInt($scope.major.priority)){
                 messageDialog('推荐值必须是整数.')
             } else {
-                $http({
-                    method: 'POST',
-                    url: '/school/major',
-                    data: $scope.major,
-                    'Content-Type': 'application/json'
-                }).success(function(data){
+                var details = [];
+                var flag = true;
+                $('tr.detail').each(function(){
+                    var vintageIndex = $(this).find('select.vintage').val();
+                    var locationIndex = $(this).find('select.location').val();
+                    var grade = $(this).find('select.grade').val();
+                    var shift = $(this).find('input.shift').val();
+                    var admission = $(this).find('input.admission').val();
+                    var average = $(this).find('input.average').val();
+                    var vintage = '';
+                    if (vintageIndex) {
+                        vintage = $scope.vintages[vintageIndex].name ;
+                    }
+                    var location = '' ;
+                    if(locationIndex) {
+                        location = $scope.provinces[locationIndex].id;
+                    }
 
-                    }).error(function(){
-                        messageDialog('添加专业出错了,专业失败.');
-                    })
+                    if (!vintage && !location && !grade && !shift && !admission && !average) {
+                        return true;
+                    } else {
+                        if (!vintage) {
+                            flag = false;
+                            messageDialog('招生年份必填.');
+                        } else if (!location){
+                            flag = false;
+                            messageDialog('招生地区必填.');
+                        } else if(!grade) {
+                            flag = false;
+                            messageDialog('招生批次必填.');
+                        } else if(!shift) {
+                            flag = false;
+                            messageDialog('调档线必填.');
+                        } else if (shift && !parseInt(shift)){
+                            flag = false;
+                            messageDialog('调档线必须是整数.');
+                        } else if(!admission)  {
+                            flag = false;
+                            messageDialog('实录线必填.');
+                        } else if (admission && !parseInt(admission)){
+                            flag = false;
+                            messageDialog('实录线必须是整数.');
+                        } else if (!average) {
+                            flag = false;
+                            messageDialog('平均线必填.');
+                        } else if (average && !parseInt(average)){
+                            flag = false;
+                            messageDialog('平均线必须是整数.');
+                        } else {
+                            var detail =  {};
+                            detail.vintage = vintage;
+                            detail.location = location;
+                            detail.grade = grade;
+                            detail.shift = shift;
+                            detail.admission = admission;
+                            detail.average = average;
+                            details.push(detail);
+                        }
+                    }
+                });
+                $scope.major.details = details;
+                if (flag) {
+                    $http({
+                        method: 'POST',
+                        url: '/school/major',
+                        data: $scope.major,
+                        'Content-Type': 'application/json'
+                    }).success(function(data){
+                            if (data.isSuccess) {
+                                messageDialog('添加专业成功.');
+                            } else if (data.errorMessage) {
+                                messageDialog(data.errorMessage);
+                            } else {
+                                messageDialog('添加专业出错了,添加专业失败.');
+                            }
+                        }).error(function(){
+                            messageDialog('添加专业出错了,添加专业失败.');
+                        })
+                } else {
+                    return false;
+                }
             }
         }
     }

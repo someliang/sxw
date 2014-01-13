@@ -379,3 +379,13 @@ exports.getMajorCategories = function(req, res){
         res.json({isSuccess: true, items: items});
     })
 };
+
+exports.getGrades = function(req, res) {
+    getTranslationByFlag(req, 'grade', function(err, items){
+        if (err) {
+            console.error("getGrades ====>" + err.message);
+            return res.json({isSuccess: false});
+        }
+        res.json({isSuccess: true, items: items});
+    })
+};

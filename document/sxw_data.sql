@@ -58,7 +58,7 @@ UNLOCK TABLES;
 
 LOCK TABLES `sxw_translation` WRITE;
 /*!40000 ALTER TABLE `sxw_translation` DISABLE KEYS */;
-INSERT INTO `sxw_translation` VALUES (1,'grade','招生等级',0,0),(2,'one','一本',1,0),(3,'two','二本',2,2),(4,'province','四川',0,0),(5,'province','北京',0,0),(6,'province','上海',0,0),(7,'province','云南',0,0),(8,'province','山西',0,0),(9,'province','陕西',0,0),(10,'schoolcategory','综合',0,0),(11,'schoolcategory','理工',0,0),(12,'schoolcategory','农林',0,0),(13,'schoolcategory','医药',0,0),(14,'schoolcategory','师范',0,0),(15,'schoolcategory','财经',0,0),(16,'schoolcategory','军事',0,0),(17,'schoolcategory','其他',0,0),(18,'character','985工程',0,0),(19,'character','211工程',0,0),(20,'character','教育部直属',0,0),(21,'character','中央部委',0,0),(22,'character','自主招生试点',0,0),(23,'majorcategory','经济学',0,0),(24,'majorcategory','哲学',0,0),(25,'majorcategory','管理学',0,0),(26,'majorcategory','法学',0,0),(27,'majorcategory','教育类',0,0),(28,'majorcategory','艺术类',0,0);
+INSERT INTO `sxw_translation` VALUES (1,'grade','提前批',0,0),(2,'one','一本',1,0),(3,'two','二本',2,2),(4,'province','四川',0,0),(5,'province','北京',0,0),(6,'province','上海',0,0),(7,'province','云南',0,0),(8,'province','山西',0,0),(9,'province','陕西',0,0),(10,'schoolcategory','综合',0,0),(11,'schoolcategory','理工',0,0),(12,'schoolcategory','农林',0,0),(13,'schoolcategory','医药',0,0),(14,'schoolcategory','师范',0,0),(15,'schoolcategory','财经',0,0),(16,'schoolcategory','军事',0,0),(17,'schoolcategory','其他',0,0),(18,'character','985工程',0,0),(19,'character','211工程',0,0),(20,'character','教育部直属',0,0),(21,'character','中央部委',0,0),(22,'character','自主招生试点',0,0),(23,'majorcategory','经济学',0,0),(24,'majorcategory','哲学',0,0),(25,'majorcategory','管理学',0,0),(26,'majorcategory','法学',0,0),(27,'majorcategory','教育类',0,0),(28,'majorcategory','艺术类',0,0),(29,'grade','一本',0,0),(30,'grade','二本',0,0),(31,'grade','三本',0,0),(32,'grade','专科',0,0);
 /*!40000 ALTER TABLE `sxw_translation` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -91,4 +91,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-01-12 21:03:42
+-- Dump completed on 2014-01-13 20:56:55
