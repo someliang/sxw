@@ -1,9 +1,9 @@
 /**
  * Created with JetBrains WebStorm.
  * User: lonso
- * Date: 13-12-11
- * Time: 下午4:56
- * To change this template use File | Settings | File Templates.
+ * Date: 1/14/14
+ * Email: lonso@foxmail.com
+ * God Bless !.
  */
 
 app.controller('translationController', function($scope,  $http){
@@ -92,15 +92,15 @@ function translationVNew($scope, $http){
                 params: {name_startsWith: request.term},
                 headers: { 'Content-Type': 'application/json' }  // set the headers so angular passing info as form data (not request payload)
             }).success(function(data) {
-                response( $.map( data.rows, function( item ) {
-                    return {
-                        label: item.name,
-                        value: item.name,
-                        name: item.categoryName,
-                        id:item.id
-                    }
-                }));
-            });
+                    response( $.map( data.rows, function( item ) {
+                        return {
+                            label: item.name,
+                            value: item.name,
+                            name: item.categoryName,
+                            id:item.id
+                        }
+                    }));
+                });
         },
         minLength: 1,
         select: function( event, ui ) {
@@ -135,10 +135,12 @@ function translationVNew($scope, $http){
             }).success(function(data) {
                     if (data.isSuccess) {
                         messageDialog('添加成功');
+                    } else if(data.errorMessage) {
+                        messageDialog(data.errorMessage);
                     } else {
                         messageDialog('添加失败,请填写正确的内容!!');
                     }
-            });
+                });
         }
     };
 }

@@ -11,6 +11,7 @@ app.controller('schoolController', function ($scope, $http) {
 
 
 var item = '';
+var major = '';
 app.config(['$routeProvider', function ($routeProvider) {
     $routeProvider
         .when('/school/new', {
@@ -28,6 +29,10 @@ app.config(['$routeProvider', function ($routeProvider) {
         .when('/school/major/new', {
             controller: majorVNew,
             templateUrl: '/school/major/new'
+        })
+        .when('/school/major/update', {
+            controller: majorVUpdate,
+            templateUrl: '/school/major/update'
         })
 }]);
 
@@ -103,6 +108,24 @@ function getSchoolCharacters($http, cb){
         })
 }
 
+function getMajorCharacters($http, cb){
+    $http({
+        method: 'GET',
+        url: '/getMajorCharacters',
+        'Content-Type': 'application/json'
+    }).success(function(data){
+            if (data.isSuccess) {
+                cb(data.items);
+            } else if (data.errorMessage) {
+                messageDialog(data.errorMessage)
+            } else {
+                messageDialog('获取专业特征信息出错了,请重新尝试.')
+            }
+        }).error(function(){
+            messageDialog('获取专业特征信息出错了,请重新尝试.')
+        })
+}
+
 function getMajorCategories($http, cb){
     $http({
         method: 'GET',
@@ -166,6 +189,10 @@ function schoolVNew($scope, $http, $upload){
         $scope.grades = items;
     });
 
+    getMajorCharacters($http, function(items){
+        $scope.recruitCharacters = items;
+    });
+
     getSchoolCategories($http, function(items){
         $scope.categories = items;
     });
@@ -206,11 +233,11 @@ function schoolVNew($scope, $http, $upload){
                 $('tr.detail').each(function(){
                     var vintageIndex = $(this).find('select.vintage').val();
                     var locationIndex = $(this).find('select.location').val();
-                    var grade = $(this).find('select.grade').val();
+                    var gradeIndex = $(this).find('select.grade').val();
                     var shift = $(this).find('input.shift').val();
                     var admission = $(this).find('input.admission').val();
                     var average = $(this).find('input.average').val();
-                    var science = $(this).find('input.science:checked').val() && 1 || 0 ;
+                    var scienceIndex = $(this).find('select.recruitCharacter').val();
                     var vintage = '';
                     if (vintageIndex) {
                         vintage = $scope.vintages[vintageIndex].name ;
@@ -219,11 +246,23 @@ function schoolVNew($scope, $http, $upload){
                     if(locationIndex) {
                         location = $scope.provinces[locationIndex].id;
                     }
+                    var science = '';
+                    if (scienceIndex) {
+                        science = $scope.recruitCharacters[scienceIndex].id;
+                    }
+
+                    var grade = '';
+                    if (gradeIndex) {
+                        grade = $scope.grades[gradeIndex].id
+                    }
 
                     if (!vintage && !location && !grade && !shift && !admission && !average) {
                         return true;
                     } else {
-                        if (!vintage) {
+                        if (!science){
+                            flag = false;
+                            messageDialog('必须选择招生所对应的类别(即文/理/艺).');
+                        } else if (!vintage) {
                             flag = false;
                             messageDialog('招生年份必填.');
                         } else if (!location){
@@ -353,7 +392,6 @@ function schoolVList($scope, $http){
 
 function schoolVUpdate($scope, $http, $upload){
     var ue = new UE.ui.Editor();
-    var imagePath = '';
     ue.render('description');
     if (!item) {
         messageDialog('亲,你还没选择要修改的内容呢!!');
@@ -459,6 +497,51 @@ function schoolVUpdate($scope, $http, $upload){
     navigationFunction('majorDetailList', 'majorDetailPager', navigatorMajorConfig);
 
 
+    $("#majorDetailList").jqGrid()
+        .navButtonAdd('#majorDetailPager', {
+            buttonicon: "ui-icon icon-pencil blue",
+            caption: '',
+            position: "first",
+            title: "编辑所选记录",
+            onClickButton: function () {
+                var rs = $("#majorDetailList").jqGrid('getGridParam', 'selarrrow');
+                if (rs.length === 1) {
+                    $http({
+                        method: 'GET',
+                        url: '/school/major',
+                        params: {id: rs},
+                        'Content-Type': 'application/json'
+                    }).success(function (data) {
+                            if (data.isSuccess) {
+                                major = data.item;
+                                location.href = '#/school/major/update';
+                            } else {
+                                messageDialog('获取专业招生详情出错了,请重新试试.');
+                            }
+                        })
+                        .error(function(){
+                            messageDialog('获取专业招生详情出错了,请重新试试.');
+                        })
+                } else {
+                    messageDialog('亲,必须并且只能操作一个哦!');
+                    return false;
+                }
+            }
+        });
+
+    $("#majorDetailList").jqGrid()
+        .navButtonAdd('#majorDetailPager', {
+            buttonicon : "ui-icon icon-plus-sign purple",
+            caption: '',
+            position : "first",
+            title : "添加新记录",
+            onClickButton : function() {
+                location.href = '#/school/major/new';
+            }
+        });
+
+
+
 
     $scope.save = function(){
         if (!$scope.school.name) {
@@ -514,6 +597,11 @@ function majorVNew($scope, $http){
     getMajorCategories($http, function(items){
         $scope.categories = items;
     });
+
+    getMajorCharacters($http, function(items){
+        $scope.characters = items;
+    });
+
 
     getProvinces($http, function(items){
         $scope.provinces = items;
@@ -630,4 +718,53 @@ function majorVNew($scope, $http){
             }
         }
     }
+}
+
+function majorVUpdate ($scope, $http){
+    if (!item || !major) {
+        messageDialog('亲,你还没选择要修改的内容呢!!');
+        return;
+    } else {
+        $scope.major = major;
+        $scope.major.school = item.name;
+        $scope.major.schoolId = item.id;
+    }
+    var ue = new UE.ui.Editor();
+    ue.render('description');
+
+
+    var jqgridMajorConfig = {};
+    jqgridMajorConfig.id = 'majorDetailList';
+    jqgridMajorConfig.pager = 'majorDetailPager';
+    jqgridMajorConfig.url = '/major/majorDetails/'+major.id;
+    jqgridMajorConfig.colNames =  ['ID', '专业名', '招生年份', '招生地区', '招生批次', '调档线', '实录线', '平均线'];
+    jqgridMajorConfig.colModel = [
+        {name: 'id', index: 'id', width: 25},
+        {name: 'name', index: 'name', editable: true, editrules: {required: true}, width: 30},
+        {name: 'vintage', index: 'vintage', formatter: 'date', formatoptions: { newformat: 'Y-m-d'}, editable: true, editrules: {required: true}, width: 30},
+        {name: 'location', index: 'location', editable: true, editrules: {required: true}, width: 30},
+        {name: 'grade', index: 'grade', editable: true, editrules: {required: true}, width: 30},
+        {name: 'shift', index: 'shift', editable: true, editrules: {required: true}, width: 30},
+        {name: 'admission', index: 'admission', editable: true, editrules: {required: true}, width: 30},
+        {name: 'average', index: 'average', editable: true, editrules: {required: true}, width: 30}
+    ];
+    jqgridMajorConfig.caption = '历年专业招生情况列表';
+    jqgridMajorConfig.editUrl = '/majorDetail';
+    jqGridInit(jqgridMajorConfig);
+    var navigatorMajorConfig = {};
+    navigatorMajorConfig.edit = false;
+    navigatorMajorConfig.add = false;
+    navigatorMajorConfig.del = true;
+    navigatorMajorConfig.serach = true;
+    navigatorMajorConfig.view = true;
+    navigatorMajorConfig.refresh = true;
+    navigationFunction('majorDetailList', 'majorDetailPager', navigatorMajorConfig);
+    getMajorCategories($http, function(items){
+        $scope.categories = items;
+    });
+
+    getMajorCharacters($http, function(items){
+        $scope.characters = items;
+    });
+
 }

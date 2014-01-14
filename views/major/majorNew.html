@@ -37,9 +37,11 @@
                 </div>
             </div>
             <div class='form-group'>
-                <label class='col-sm-3 control-label no-padding-right' for='science'> 文科 </label>
+                <label class='col-sm-3 control-label no-padding-right'> 专业特征 </label>
                 <div class='col-sm-9'>
-                    <input id='science' type='checkbox' value='true' ng-model='major.science'/>
+                    <select class='col-xs-10 col-sm-5' required  ng-model='major.character' ng-options='m.id as m.name for m in characters'>
+                        <option value=''>-- 请选择专业类别 --</option>
+                    </select>
                 </div>
             </div>
             <div class='form-group has-error'>

@@ -44,6 +44,7 @@ module.exports = function (app) {
     app.get('/getProvinces', translation.getProvinces);
     app.get('/getSchoolCategories', translation.getSchoolCategories);
     app.get('/getSchoolCharacters', translation.getSchoolCharacters);
+    app.get('/getMajorCharacters', translation.getMajorCharacters);
     app.get('/getMajorCategories', translation.getMajorCategories);
     app.get('/getGrades', translation.getGrades);
 
@@ -63,11 +64,13 @@ module.exports = function (app) {
     //major
     app.get('/school/major/new', school.majorNew);
     app.get('/majorDetails/:id', school.majorDetails);
+    app.get('/major/majorDetails/:id', school.majorDetailByMajor);
     app.post('/school/major', school.majorCreate);
+    app.get('/school/major', school.majorRead);
     app.post('/schoolDetail/:id', school.schoolDetailCreate);
     app.put('/schoolDetail/:id', school.schoolDetailUpdate);
     app.delete('/schoolDetail/:id', school.schoolDetailDelete);
-
+    app.get('/school/major/update', school.majorUpdateForm);
 
 
     //translation url

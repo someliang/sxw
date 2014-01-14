@@ -53,7 +53,7 @@
                 </div>
             </div>
             <div class='form-group has-error schoolCharacter'>
-                <label class='col-sm-3 control-label no-padding-right' for='summary'> 学校特征 </label>
+                <label class='col-sm-3 control-label no-padding-right'> 学校特征 </label>
                 <div class='col-sm-9'>
                     <label style="margin-right: 1%;" ng-repeat="character in characters">
                         <input name='form-field-checkbox' type='checkbox' class='ace character' value='[[character.id]]'>
@@ -118,10 +118,9 @@
                                 <input type="text" required ng-model="detail.average" class='average' placeholder='平均线'/>
                             </td>
                             <td>
-                                <label style="margin-right: 1%;">
-                                    <input name='form-field-checkbox' type='checkbox' class='science ace character' value='true'>
-                                    <span class='lbl'>文科</span>
-                                </label>
+                                <select class= 'recruitCharacter' required  ng-model='detail.character' ng-options='m.id as m.name for m in recruitCharacters'>
+                                    <option value=''>-- 请选择分数类别 --</option>
+                                </select>
                             </td>
                             <td>
                                 <div class="visible-md visible-lg hidden-sm hidden-xs btn-group">

@@ -1,0 +1,140 @@
+<div class='row' ng-controller='schoolController'>
+    <p>
+        <button class='btn btn-success' ng-click='save()'>保存</button>
+        <button class='btn btn-primary' ng-click='addDetail()'>添加专业招生情况</button>
+    </p>
+    <div class='col-xs-12'>
+        <form novalidate class='form-horizontal' name='majorForm' role='form'>
+            <div class='form-group has-error'>
+                <label class='col-sm-3 control-label no-padding-right' for='school'> 学校名称 </label>
+                <div class='col-sm-9'>
+                    <input type='text' readonly ng-model = 'major.school' name='school' id='school' placeholder='学校名称' class='col-xs-10 col-sm-5'/>
+                </div>
+            </div>
+            <div class='form-group has-error'>
+                <label class='col-sm-3 control-label no-padding-right' for='name'> 专业名称 </label>
+                <div class='col-sm-9'>
+                    <input type='text' required ng-model = 'major.name' name='name' id='name' placeholder='专业名称' class='col-xs-10 col-sm-5'/>
+                    <div class='has-error' ng-show='majorForm.name.$dirty && majorForm.name.$invalid'>
+                        <small class='help-block col-xs-12 col-sm-reset inline' ng-show='majorForm.name.$error.required'>
+                            专业名称必填哦.
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class='form-group has-error'>
+                <label class='col-sm-3 control-label no-padding-right' for='category'> 专业类别 </label>
+                <div class='col-sm-9'>
+                    <select class='col-xs-10 col-sm-5' required id='category' ng-model='major.category' >
+                        <option ng-selected="[[major.category == province.id]]"
+                                ng-repeat="category in categories"
+                                value="[[category.id]]">
+                            [[category.name]]
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <div class='form-group'>
+                <label class='col-sm-3 control-label no-padding-right' for='priority'> 推荐值 </label>
+                <div class='col-sm-9'>
+                    <input type='text' required ng-model = 'major.priority' name='priority' id='priority' placeholder='推荐值' class='col-xs-10 col-sm-5'/>
+                </div>
+            </div>
+            <div class='form-group'>
+                <label class='col-sm-3 control-label no-padding-right'> 专业特征 </label>
+                <div class='col-sm-9'>
+                    <select class='col-xs-10 col-sm-5' required id='character' ng-model='major.science' >
+                        <option ng-selected="[[major.science == character.id]]"
+                                ng-repeat="character in characters"
+                                value="[[character.id]]">
+                            [[character.name]]
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <div class='form-group has-error'>
+                <label class='col-sm-3 control-label no-padding-right' for='description'> 专业详情 </label>
+                <div style='margin-left: 1%' class='col-sm-6'>
+                    <div id='description' class='row'></div>
+                </div>
+            </div>
+        </form>
+
+        <div class="col-xs-12">
+            <table id="majorDetailList"></table>
+            <div id="majorDetailPager"></div>
+        </div>
+
+        <!--<div class="row">-->
+            <!--<div class="col-xs-12">-->
+                <!--<div class="table-responsive">-->
+                    <!--<table id="sample-table-1" class="table table-striped table-bordered table-hover">-->
+                        <!--<thead>-->
+                        <!--<tr>-->
+                            <!--<th class='col-xs-3 col-sm-1'>年份</th>-->
+                            <!--<th class='col-xs-3 col-sm-1'>地区</th>-->
+                            <!--<th class='col-xs-3 col-sm-1'>招生批次</th>-->
+                            <!--<th class='col-xs-3 col-sm-1'>调档线</th>-->
+                            <!--<th class='col-xs-3 col-sm-1'>实录线</th>-->
+                            <!--<th class='col-xs-3 col-sm-1'>平均线</th>-->
+                            <!--<th class='col-xs-3 col-sm-1'>删除</th>-->
+                        <!--</tr>-->
+                        <!--</thead>-->
+                        <!--<tbody>-->
+                        <!--<tr class='detail' ng-repeat="detail in major.details">-->
+                            <!--<td>-->
+                                <!--<select class='col-xs-10 col-sm-5' required id='vintage' ng-model='detail.vintage' >-->
+                                    <!--<option ng-selected="[[detail.vintage == vintage.id]]"-->
+                                            <!--ng-repeat="vintage in vintages"-->
+                                            <!--value="[[vintage.id]]">-->
+                                        <!--[[vintage.name]]-->
+                                    <!--</option>-->
+                                <!--</select>-->
+
+                            <!--</td>-->
+                            <!--<td>-->
+                                <!--<select class='col-xs-10 col-sm-5' required id='location' ng-model='detail.location' >-->
+                                    <!--<option ng-selected="[[detail.location == province.id]]"-->
+                                            <!--ng-repeat="province in provinces"-->
+                                            <!--value="[[province.id]]">-->
+                                        <!--[[province.name]]-->
+                                    <!--</option>-->
+                                <!--</select>-->
+                            <!--</td>-->
+                            <!--<td>-->
+                                <!--<select class='col-xs-10 col-sm-5' required id='grade' ng-model='detail.grade' >-->
+                                    <!--<option ng-selected="[[detail.grade == grade.id]]"-->
+                                            <!--ng-repeat="grade in grades"-->
+                                            <!--value="[[grade.id]]">-->
+                                        <!--[[grade.name]]-->
+                                    <!--</option>-->
+                                <!--</select>-->
+
+                            <!--</td>-->
+                            <!--<td>-->
+                                <!--<input type="text" required ng-model="detail.shift" class='shift' placeholder='调档线'/>-->
+                            <!--</td>-->
+
+                            <!--<td>-->
+                                <!--<input type="text" required ng-model="detail.admission" class='admission' placeholder='实录线'/>-->
+                            <!--</td>-->
+                            <!--<td>-->
+                                <!--<input type="text" required ng-model="detail.average" class='average' placeholder='平均线'/>-->
+                            <!--</td>-->
+                            <!--<td>-->
+                                <!--<div class="visible-md visible-lg hidden-sm hidden-xs btn-group">-->
+                                    <!--<button ng-click="deleteDetail($index)" class="btn btn-xs btn-danger">-->
+                                        <!--<i class="icon-trash bigger-120"></i>-->
+                                    <!--</button>-->
+                                <!--</div>-->
+                            <!--</td>-->
+                        <!--</tr>-->
+                        <!--</tbody>-->
+                    <!--</table>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+
+    </div>
+</div>
+

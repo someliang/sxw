@@ -65,7 +65,7 @@ app.use(orm.express('mysql://root:@127.0.0.1/sxw', {
             shift: {type: 'number', rational: true},
             admission: {type: 'number', rational: true},
             average: {type: 'number', rational: true},
-            science: {type: 'boolean'},
+            science: {type: 'number', rational: true},
             sxw_school_id: {type: 'number', rational: true}
         });
 
@@ -76,7 +76,7 @@ app.use(orm.express('mysql://root:@127.0.0.1/sxw', {
             priority: {type: 'number', rational: true},
             popularity: {type: 'number', rational: true},
             sxw_school_id: {type: 'number', rational: true},
-            science: {type: 'boolean'}
+            science: {type: 'number', rational: true}
         });
 
         models.majorDetail = db.define('sxw_major_detail', {

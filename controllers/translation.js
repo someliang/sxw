@@ -105,103 +105,113 @@ exports.translationCreate = function(req, res){
     if (!code || !name){
         res.json({isSuccess : false});
     } else {
-    var oper = req.body.oper;
-    var Translation = req.models.translation;
-    if (oper) {
-        var category = req.body.category;
-        if (category) {
-            var categoryFlags = category.trim().split('-');
-            async.each(categoryFlags, function(categoryFlag, callback) {
-                Translation.find({name:categoryFlag}, function(err, cf) {
-                    if ( !cf.length) {
-                        return callback('err',null);
-                    } else {
-                        callback();
-                    }
-                })
-            }, function (err) {
-                if (err) {
-                    res.json({isSuccess: false});
-                } else {
-                    var categoryName = categoryFlags[categoryFlags.length - 1];
-                    Translation.find({name: categoryName}, function (err, items) {
+        var Translation = req.models.translation;
+        Translation.find({code: code}).count(function(err, count){
+            if (err){
+                console.error('find translation by code ====>' + err.message);
+                return res.json({isSuccess: false});
+            }
+        if (count ===0) {
+            var oper = req.body.oper;
+            if (oper) {
+                var category = req.body.category;
+                if (category) {
+                    var categoryFlags = category.trim().split('-');
+                    async.each(categoryFlags, function (categoryFlag, callback) {
+                        Translation.find({name: categoryFlag}, function (err, cf) {
+                            if (!cf.length) {
+                                return callback('err', null);
+                            } else {
+                                callback();
+                            }
+                        })
+                    }, function (err) {
                         if (err) {
-                            console.error("translationCreate oper ====>" + err.message);
                             res.json({isSuccess: false});
                         } else {
-                            Translation.create({
-                                code: code.toLowerCase(),
-                                name: name,
-                                category: items[0].id,
-                                priority: priority
-                            }, function (err, item) {
+                            var categoryName = categoryFlags[categoryFlags.length - 1];
+                            Translation.find({name: categoryName}, function (err, items) {
                                 if (err) {
-                                    console.error("translationCreate ====>" + err.message);
+                                    console.error("translationCreate oper ====>" + err.message);
                                     res.json({isSuccess: false});
+                                } else {
+                                    Translation.create({
+                                        code: code.toLowerCase(),
+                                        name: name,
+                                        category: items[0].id,
+                                        priority: priority
+                                    }, function (err, item) {
+                                        if (err) {
+                                            console.error("translationCreate ====>" + err.message);
+                                            res.json({isSuccess: false});
+                                        }
+                                        res.json({isSuccess: true, item: item})
+                                    });
                                 }
-                                res.json({isSuccess: true, item: item})
                             });
                         }
                     });
+                } else {
+                    Translation.create({
+                        code: code.toLowerCase(),
+                        name: name,
+                        category: 0,
+                        priority: priority
+                    }, function (err, item) {
+                        if (err) {
+                            console.error("translationCreate ====>" + err.message);
+                            res.json({isSuccess: false});
+                        }
+                        res.json({isSuccess: true, item: item})
+                    });
                 }
-            });
-        } else {
-            Translation.create({
-                code: code.toLowerCase(),
-                name: name,
-                category: 0,
-                priority: priority
-            }, function (err, item) {
-                if (err) {
-                    console.error("translationCreate ====>" + err.message);
-                    res.json({isSuccess: false});
-                }
-                res.json({isSuccess: true, item: item})
-            });
-        }
-    }  else {
-        var categoryName = req.body.categoryName || '';
-        var categoryId = req.body.categoryId || 0;
-        if (!categoryName) {
-            Translation.create({
-                code: code.toLowerCase(),
-                name: name,
-                category: 0,
-                priority: priority
-            }, function (err, item) {
-                if (err) {
-                    console.error("translationCreate ====>" + err.message);
-                    res.json({isSuccess: false});
-                }
-                res.json({isSuccess: true, item: item})
-            });
-        } else {
-            Translation.get(categoryId, function (err, item) {
-                if (err) {
-                    console.error("translationCreate find category ====>" + err.message);
-                    return res.json({isSuccess: false});
-                }
-                util.getFullParentName(Translation, item, function (err, fullParentName) {
-                    if (fullParentName === categoryName.trim()) {
-                        Translation.create({
-                            code: code.toLowerCase(),
-                            name: name,
-                            category: categoryId,
-                            priority: priority
-                        }, function (err, item) {
-                            if (err) {
-                                console.error("translationCreate ====>" + err.message);
+            } else {
+                var categoryName = req.body.categoryName || '';
+                var categoryId = req.body.categoryId || 0;
+                if (!categoryName) {
+                    Translation.create({
+                        code: code.toLowerCase(),
+                        name: name,
+                        category: 0,
+                        priority: priority
+                    }, function (err, item) {
+                        if (err) {
+                            console.error("translationCreate ====>" + err.message);
+                            res.json({isSuccess: false});
+                        }
+                        res.json({isSuccess: true, item: item})
+                    });
+                } else {
+                    Translation.get(categoryId, function (err, item) {
+                        if (err) {
+                            console.error("translationCreate find category ====>" + err.message);
+                            return res.json({isSuccess: false});
+                        }
+                        util.getFullParentName(Translation, item, function (err, fullParentName) {
+                            if (fullParentName === categoryName.trim()) {
+                                Translation.create({
+                                    code: code.toLowerCase(),
+                                    name: name,
+                                    category: categoryId,
+                                    priority: priority
+                                }, function (err, item) {
+                                    if (err) {
+                                        console.error("translationCreate ====>" + err.message);
+                                        res.json({isSuccess: false});
+                                    }
+                                    res.json({isSuccess: true, item: item})
+                                });
+                            } else {
                                 res.json({isSuccess: false});
                             }
-                            res.json({isSuccess: true, item: item})
                         });
-                    } else {
-                        res.json({isSuccess: false});
-                    }
-                });
-            });
+                    });
+                }
+            }
+        } else {
+            res.json({isSuccess: false, errorMessage: '标识编码必须唯一.'})
         }
-    }
+    })
     }
 };
 
@@ -220,55 +230,64 @@ exports.translationUpdate = function(req, res){
         res.json({isSuccess: false});
     } else {
         var Translation = req.models.translation;
-        var category = req.body.category || 0;
-        if (category) {
-            var categoryFlags = category.trim().split('-');
-            async.each(categoryFlags, function(categoryFlag, callback) {
-                Translation.find({name:categoryFlag}, function(err, cf) {
-                    if ( !cf.length) {
-                        return callback('err',null);
-                    } else {
-                        callback();
-                    }
-                })
-            }, function (err) {
-                if (err) {
-                    res.json({isSuccess: false});
-                } else {
-                    var categoryName = categoryFlags[categoryFlags.length - 1];
-                    Translation.find({name: categoryName}, function (err, items) {
+        Translation.find({code: code}).count(function(err, count){
+            if (err) {
+                console.error('translation update find by code  ====>' + err.message);
+                return res.json({isSuccess: false});
+            }
+            if (count < 2) {
+                var category = req.body.category || 0;
+                if (category) {
+                    var categoryFlags = category.trim().split('-');
+                    async.each(categoryFlags, function(categoryFlag, callback) {
+                        Translation.find({name:categoryFlag}, function(err, cf) {
+                            if ( !cf.length) {
+                                return callback('err',null);
+                            } else {
+                                callback();
+                            }
+                        })
+                    }, function (err) {
                         if (err) {
-                            console.error("translationUpdate oper ====>" + err.message);
                             res.json({isSuccess: false});
                         } else {
-                            Translation.get(id, function(err, item){
+                            var categoryName = categoryFlags[categoryFlags.length - 1];
+                            Translation.find({name: categoryName}, function (err, items) {
                                 if (err) {
-                                    console.error("translationUpdate ====>"+err.message);
-                                    return res.json({isSuccess: false});
+                                    console.error("translationUpdate oper ====>" + err.message);
+                                    res.json({isSuccess: false});
+                                } else {
+                                    Translation.get(id, function(err, item){
+                                        if (err) {
+                                            console.error("translationUpdate ====>"+err.message);
+                                            return res.json({isSuccess: false});
+                                        }
+                                        item.save({
+                                            code : code.toLowerCase(),
+                                            name : name,
+                                            category : items[0].id,
+                                            priority: priority
+                                        }, function(err){
+                                            if (err) {
+                                                console.error("translationUpdate ====>"+err.message);
+                                                res.json({isSuccess: false});
+                                            }
+                                            res.json({isSuccess: true})
+                                        });
+                                    });
+
+
                                 }
-                                item.save({
-                                    code : code.toLowerCase(),
-                                    name : name,
-                                    category : items[0].id,
-                                    priority: priority
-                                }, function(err){
-                                    if (err) {
-                                        console.error("translationUpdate ====>"+err.message);
-                                        res.json({isSuccess: false});
-                                    }
-                                    res.json({isSuccess: true})
-                                });
                             });
-
-
                         }
                     });
+                } else {
+                    res.json({isSuccess: false});
                 }
-            });
-        } else {
-            res.json({isSuccess: false});
-        }
-
+            } else {
+                res.json({isSuccess: false, errorMessage: '标识编码必须唯一.'})
+            }
+        })
     }
 };
 
@@ -357,8 +376,15 @@ exports.getCategory = function(req, res){
 
 function getTranslationByFlag(req, flag, cb){
     var Translation = req.models.translation;
-    Translation.find({code: flag}).all(function(err, items){
-        cb(err, items)
+    Translation.find({code: flag}).all(function(err, translations){
+        if (translations.length === 0){
+            cb(new Error('not exist translation'));
+        } else {
+            Translation.find({category: translations[0].id}).all(function(err, items){
+                err && cb(err);
+                cb(null, items);
+            })
+        }
     })
 }
 
@@ -392,6 +418,17 @@ exports.getSchoolCharacters = function(req, res) {
         res.json({isSuccess: true, items: items});
     })
 };
+
+exports.getMajorCharacters = function(req, res){
+    getTranslationByFlag(req, 'majorcharacter', function(err, items){
+        if (err) {
+            console.error("getMajorCharacters ====>" + err.message);
+            return res.json({isSuccess: false});
+        }
+        res.json({isSuccess: true, items: items});
+    })
+};
+
 
 exports.getMajorCategories = function(req, res){
     getTranslationByFlag(req, 'majorcategory', function(err, items){

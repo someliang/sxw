@@ -90,7 +90,7 @@ exports.schoolDetails = function(req, res){
 function deleteSchoolInfo(req, id){
     var School = req.models.school;
     var Translation2School = req.models.translation2school;
-    async.waterfall([
+    async.series([
         function(cb){
             Translation2School.find({sxw_school_id: id}).remove(function(err){
                 if (err)
@@ -98,10 +98,11 @@ function deleteSchoolInfo(req, id){
                 cb();
             })
         },
-        function(t2s, cb){
+        function(cb){
             School.find({id: id}).remove(function(err){
-                if (err)
-                    console.error('Schooldelete ====>' + err.message);
+                if (err){
+                    console.error('Schooldelete ====>'+ id +'***************' + err.message);
+                }
                 cb();
             })
         }
@@ -371,11 +372,72 @@ exports.schoolDelete = function(req, res){
         res.json({isSuccess: false});
     } else {
         var School = req.models.school;
+        var Major = req.models.major;
+        var MajorDetail = req.models.majorDetail;
+        var SchoolDetail = req.models.schoolDetail;
         var Translation2School = req.models.translation2school;
         ids = ids.split(",");
-        Translation2School.find({sxw_school_id: ids}).remove(function(err){
+        async.parallel([
+            function(cb){
+                  async.series([
+                      function(cb){
+                          Translation2School.find({sxw_school_id: ids}).remove(function(err){
+                              if (err) {
+                                  console.error("schoolDelete Translation2School ====>" + err.message);
+                                  cb(err);
+                              }
+                              cb();
+                          })
+                      },
+                      function(cb){
+                          SchoolDetail.find({sxw_school_id: ids}).remove(function(err){
+                              if (err) {
+                                  console.error('school details delete ====>' + err.message);
+                                  cb(err);
+                              }
+                              cb(null, null);
+                          })
+                      }
+                  ], function(err){
+                      err && cb(err);
+                      cb();
+                  })
+            },
+            function(cb){
+                async.waterfall([
+                    function(cb){
+                        Major.find({sxw_school_id: ids}).all(function(err, majors){
+                            err && cb(err);
+                            var deleteMajorIds = [];
+                            async.each(majors, function(major, callback){
+                                deleteMajorIds.push(major.id);
+                                callback();
+                            }, function(err){
+                                err && cb(err);
+                                cb(null, deleteMajorIds);
+                            })
+                        })
+                    },
+                    function(result, cb) {
+                        MajorDetail.find({sxw_major_id: result}).remove(function(err){
+                            err && cb(err);
+                            cb(null, result);
+                        })
+                    },
+                    function(result, cb){
+                        Major.find({id: result}).remove(function(err){
+                            err && cb(err);
+                            cb();
+                        })
+                    }
+                ], function(err){
+                    err && cb(err);
+                    cb();
+                })
+            }
+        ], function(err){
             if (err) {
-                console.error("schoolDelete ====>" + err.message);
+                console.error('school delete error ====>' + err.message);
                 return res.json({isSuccess: false});
             }
             School.find({id: ids}).remove(function(err){
@@ -385,7 +447,7 @@ exports.schoolDelete = function(req, res){
                 }
                 res.json({isSuccess: true});
             });
-        })
+        });
     }
 };
 
@@ -480,6 +542,10 @@ exports.schoolDetailDelete = function(req, res){
     }
 };
 
+exports.majorUpdateForm = function(req, res){
+    res.render('major/majorUpdate');
+};
+
 exports.majorNew = function(req, res){
     res.render('major/majorNew');
 };
@@ -530,6 +596,22 @@ exports.majorDetails = function(req, res){
     }
 };
 
+exports.majorDetailByMajor = function(req, res){
+    var majorId = req.params.id || '';
+    if (!majorId) {
+        res.json({isSuccess: false, rows: ''});
+    } else {
+        var MajorDetail = req.models.majorDetail;
+        MajorDetail.find({sxw_major_id: majorId}).all(function(err, majorDetails){
+            if (err) {
+                console.error('major details get by major ====>' + err.message);
+                return res.json({isSuccess: false});
+            }
+            res.json({isSuccess: false, rows: majorDetails});
+        })
+    }
+};
+
 exports.majorCreate = function(req, res){
     var id = req.body.schoolId;
     var name = req.body.name;
@@ -537,8 +619,8 @@ exports.majorCreate = function(req, res){
     var priority = req.body.priority;
     var description = req.body.description;
     var details = req.body.details;
-    var science = req.body.science && 1 || 0;
-    if (!id || !name || !category || !description) {
+    var science = req.body.character;
+    if (!id || !name || !category || !description || !science) {
         res.json({isSuccess: false});
     } else {
         var Major = req.models.major;
@@ -606,3 +688,41 @@ exports.majorCreate = function(req, res){
     }
 };
 
+exports.majorRead = function(req, res){
+    var id = queryString.parse(url.parse(req.url).query).id;
+    if (!id) {
+        res.json({isSuccess: false});
+    } else {
+        var Major = req.models.major;
+        var MajorDetail = req.models.majorDetail;
+        async.auto({
+            majorDetail: function(cb) {
+                MajorDetail.get(id, function(err, item){
+                    if (err) {
+                        console.error('majorDetail read ====> ' + err.message);
+                        cb(err);
+                    }
+                    cb(null, item);
+                })
+            },
+            major: ['majorDetail', function(cb, result){
+                Major.get(result.majorDetail.sxw_major_id, function(err, item){
+                    err && cb(err);
+                    cb(null, item);
+                })
+
+            }]
+        }, function(err, result){
+            if (err) {
+                console.error('major read async complete error ====>' + err.message);
+                return res.json({isSuccess: false});
+            }
+            if (!result.major){
+                console.error('major not exist ====>');
+                return res.json({isSuccess: false});
+            } else {
+                res.json({isSuccess: true, item: result.major})
+            }
+        })
+    }
+};
