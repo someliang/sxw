@@ -37,6 +37,8 @@ module.exports = function (app) {
     app.get('/', index.index);
     app.get('/getTranslationSelectStyle', translation.getTranslationSelectStyle);
     app.get('/getLocationSelectStyle', translation.getLocationSelectStyle);
+    app.get('/getGradeSelectStyle', translation.getGradeSelectStyle);
+    app.get('/getVintageSelectStyle', translation.getVintageSelectStyle);
     app.get('/getVintages', translation.getVintages);
     app.get('/getCategory', translation.getCategory);
     app.get('/getProvinces', translation.getProvinces);
@@ -50,7 +52,7 @@ module.exports = function (app) {
     //school
     app.get('/school/new', school.schoolNew);
     app.get('/school/list', school.schoolList);
-    app.get('/schoolDetails', school.schoolDetails);
+    app.get('/schoolDetails/:id', school.schoolDetails);
     app.get('/school/update', school.schoolUpdateForm);
     app.get('/schools', school.schools);
     app.post('/school', school.schoolCreate);
@@ -60,7 +62,12 @@ module.exports = function (app) {
 
     //major
     app.get('/school/major/new', school.majorNew);
+    app.get('/majorDetails/:id', school.majorDetails);
     app.post('/school/major', school.majorCreate);
+    app.post('/schoolDetail/:id', school.schoolDetailCreate);
+    app.put('/schoolDetail/:id', school.schoolDetailUpdate);
+    app.delete('/schoolDetail/:id', school.schoolDetailDelete);
+
 
 
     //translation url
@@ -79,5 +86,6 @@ module.exports = function (app) {
     app.post('/admin/user', admin.userCreate);
     app.put('/admin/user', admin.userUpdate);
     app.delete('/admin/user', admin.userDelete);
+
 
 };

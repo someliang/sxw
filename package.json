@@ -19,7 +19,7 @@
     "orm": "latest",
     "async": "latest",
     "moment": "latest",
-    "validator": "latest",
+    "validator": "2.0.0",
     "log4js": "latest",
     "passport": "latest",
     "passport-local": "latest",

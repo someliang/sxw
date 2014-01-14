@@ -192,6 +192,14 @@ function booleanFormat(cellvalue, options, rowObject){
     }
 }
 
+function scienceFormat(cellvalue, options, rowObject){
+    if (cellvalue) {
+        return '文科';
+    } else {
+        return '理科';
+    }
+}
+
 function dateFormat(cellvalue, options, rowObject) {
     return new Date (cellvalue).toLocaleDateString();
 }

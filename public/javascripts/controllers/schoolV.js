@@ -365,7 +365,6 @@ function schoolVUpdate($scope, $http, $upload){
     ue.addListener('ready', function () {
         ue.setContent(item.description);
     });
-
     initFileInput('#badge', true);
     $scope.school.characterIds = '';
     $('div.formCoverDiv a.remove').on('click', function(){
@@ -386,6 +385,80 @@ function schoolVUpdate($scope, $http, $upload){
     getSchoolCharacters($http, function(items){
         $scope.characters = items;
     });
+
+    var jqgridConfig = {};
+    jqgridConfig.id = 'schoolDetailList';
+    jqgridConfig.pager = 'schoolDetailPager';
+    jqgridConfig.url = '/schoolDetails/' + item.id;
+    jqgridConfig.colNames = ['ID', '招生年份', '招生地区', '招生批次', '调档线', '实录线', '平均线', '文理科'];
+    jqgridConfig.colModel = [
+        {name: 'id', index: 'id', hidden: true, width: 25},
+        {name: 'vintage', index: 'vintage', edittype: 'select', formatter: 'date',
+            formatoptions: { newformat: 'Y-m-d'},
+            editable: true,
+            editrules: {required: true}, width: 30,
+            editoptions: {
+                dataUrl: '/getVintageSelectStyle'
+            }
+        },
+        {name: 'location', index: 'location', edittype: 'select', editable: true, editrules: {required: true}, width: 30,
+            editoptions: {
+                dataUrl: '/getLocationSelectStyle'
+            }
+        },
+        {name: 'grade', index: 'grade', edittype: 'select', editable: true, editrules: {required: true}, width: 30,
+            editoptions: {
+                dataUrl: '/getGradeSelectStyle'
+            }
+        },
+        {name: 'shift', index: 'shift', editable: true, editrules: {required: true}, width: 30},
+        {name: 'admission', index: 'admission', editable: true, editrules: {required: true}, width: 30},
+        {name: 'average', index: 'average', editable: true, editrules: {required: true}, width: 30},
+        {name: 'science', index: 'science', editable: true, edittype: 'checkbox', editoptions: { value:"文科:理科" },
+            formatter: scienceFormat, editrules: {required: true}, width: 30}
+    ];
+    jqgridConfig.caption = '历年学校招生情况列表';
+    jqgridConfig.editUrl = '/schoolDetail/' + item.id;
+    jqGridInit(jqgridConfig);
+    var navigatorConfig = {};
+    navigatorConfig.edit = true;
+    navigatorConfig.add = true;
+    navigatorConfig.del = true;
+    navigatorConfig.serach = true;
+    navigatorConfig.view = true;
+    navigatorConfig.refresh = true;
+    navigationFunction('schoolDetailList', 'schoolDetailPager', navigatorConfig);
+
+
+
+    var jqgridMajorConfig = {};
+    jqgridMajorConfig.id = 'majorDetailList';
+    jqgridMajorConfig.pager = 'majorDetailPager';
+    jqgridMajorConfig.url = '/majorDetails/'+item.id;
+    jqgridMajorConfig.colNames =  ['ID', '专业名', '招生年份', '招生地区', '招生批次', '调档线', '实录线', '平均线'];
+    jqgridMajorConfig.colModel = [
+        {name: 'id', index: 'id', width: 25},
+        {name: 'name', index: 'name', editable: true, editrules: {required: true}, width: 30},
+        {name: 'vintage', index: 'vintage', formatter: 'date', formatoptions: { newformat: 'Y-m-d'}, editable: true, editrules: {required: true}, width: 30},
+        {name: 'location', index: 'location', editable: true, editrules: {required: true}, width: 30},
+        {name: 'grade', index: 'grade', editable: true, editrules: {required: true}, width: 30},
+        {name: 'shift', index: 'shift', editable: true, editrules: {required: true}, width: 30},
+        {name: 'admission', index: 'admission', editable: true, editrules: {required: true}, width: 30},
+        {name: 'average', index: 'average', editable: true, editrules: {required: true}, width: 30}
+    ];
+    jqgridMajorConfig.caption = '历年专业招生情况列表';
+    jqgridMajorConfig.editUrl = '/majorDetail';
+    jqGridInit(jqgridMajorConfig);
+    var navigatorMajorConfig = {};
+    navigatorMajorConfig.edit = false;
+    navigatorMajorConfig.add = false;
+    navigatorMajorConfig.del = true;
+    navigatorMajorConfig.serach = true;
+    navigatorMajorConfig.view = true;
+    navigatorMajorConfig.refresh = true;
+    navigationFunction('majorDetailList', 'majorDetailPager', navigatorMajorConfig);
+
+
 
     $scope.save = function(){
         if (!$scope.school.name) {

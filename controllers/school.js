@@ -72,7 +72,19 @@ exports.schoolUpdateForm = function(req, res){
 };
 
 exports.schoolDetails = function(req, res){
-    res.json({rows: ''});
+    var id = req.params.id || '';
+    if (!id) {
+         res.json({isSuccess: false, rows: ''});
+    } else {
+        var SchoolDetail = req.models.schoolDetail;
+        SchoolDetail.find({sxw_school_id: id}).all(function(err, schoolDetails){
+            if (err) {
+                console.error('SchoolDetail ====>' + err.message);
+                return res.json({isSuccess: false});
+            }
+            res.json({isSuccess: true, rows: schoolDetails});
+        })
+    }
 };
 
 function deleteSchoolInfo(req, id){
@@ -377,8 +389,145 @@ exports.schoolDelete = function(req, res){
     }
 };
 
+exports.schoolDetailCreate = function(req, res){
+    var id = req.params.id;
+    if (!id) {
+        res.json({isSuccess: false});
+    } else {
+        var vintage = req.body.vintage;
+        var location = req.body.location;
+        var grade = req.body.grade;
+        var shift = req.body.shift;
+        var admission = req.body.admission;
+        var average = req.body.average;
+        var science = req.body.science && req.body.science === '文科' && 1 || 0;
+        if (!vintage || !location || !grade || !shift || !admission || ! average) {
+            return res.json({isSuccess: false});
+        } else {
+
+            var SchoolDetail = req.models.schoolDetail;
+            SchoolDetail.create({
+                vintage: new Date(vintage, 0, 1),
+                location: location,
+                grade: grade,
+                shift: shift,
+                admission: admission,
+                average: average,
+                science: science,
+                sxw_school_id: id
+            }, function(err){
+                if (err) {
+                    console.error('shool detail create ====>' + err.message);
+                    return res.json({isSuccess: false});
+                }
+                res.json({isSuccess: true});
+            })
+        }
+    }
+};
+
+exports.schoolDetailUpdate = function(req, res){
+    var vintage = req.body.vintage;
+    var location = req.body.location;
+    var grade = req.body.grade;
+    var shift = req.body.shift;
+    var admission = req.body.admission;
+    var average = req.body.average;
+    var id = req.body.id;
+    var science = req.body.science && req.body.science === '文科' && 1 || 0;
+    if (!vintage || !location || !grade || !shift || !admission || ! average || !id) {
+        return res.json({isSuccess: false});
+    } else {
+        var SchoolDetail = req.models.schoolDetail;
+        SchoolDetail.get(id, function(err, schoolDetail){
+            if (err) {
+                console.error('school detail get ====>' + err.message);
+                return res.json({isSuccess: false});
+            }
+            schoolDetail.save({
+                vintage: new Date(vintage, 0, 1),
+                location: location,
+                grade: grade,
+                shift: shift,
+                admission: admission,
+                average: average,
+                science: science
+            }, function(err){
+                if (err) {
+                    console.error('shool detail update ====>' + err.message);
+                    return res.json({isSuccess: false});
+                }
+                res.json({isSuccess: true});
+            })
+        })
+    }
+};
+
+exports.schoolDetailDelete = function(req, res){
+    var ids = req.body.id;
+    if (!ids) {
+        res.json({isSuccess: false});
+    } else {
+        ids = ids.split(',');
+        var SchoolDetail = req.models.schoolDetail;
+        SchoolDetail.find({id: ids}).remove(function(err){
+            if (err) {
+                console.error('school detail delete ====>' + err.message);
+                return res.json({isSuccess: false});
+            }
+            res.json({isSuccess: true});
+        })
+    }
+};
+
 exports.majorNew = function(req, res){
     res.render('major/majorNew');
+};
+
+exports.majorDetails = function(req, res){
+    var schoolId = req.params.id || '';
+    if (!schoolId) {
+        res.json({isSuccess: false, rows: ''});
+    } else {
+        var Major = req.models.major;
+        var MajorDetail = req.models.majorDetail;
+        var items = [];
+        Major.find({sxw_school_id: schoolId}).all(function(err, majors){
+            if (err) {
+                console.error('major get by school ====>' + err.message);
+                return res.json({isSuccess: false});
+            }
+            async.each(majors, function(major, callback){
+                MajorDetail.find({sxw_major_id: major.id}).all(function(err, majorDetails){
+                    if (err) {
+                        console.error('major details get by major ====>' + err.message);
+                        return res.json({isSuccess: false});
+                    }
+                    async.each(majorDetails, function(majorDetail, callback){
+                        var item = {};
+                        item = majorDetail;
+                        item.name = major.name;
+                        items.push(item);
+                        callback();
+                    }, function(err){
+                        if (err) {
+                            console.error('major details async ====>' + err.message);
+                            return res.json({isSuccess: false});
+                        }
+                        callback();
+                    })
+                })
+
+            }, function(err){
+                if (err) {
+                    console.error('async majors ====>' + err.message);
+                    return res.json({isSuccess: false});
+                }
+                res.json({isSuccess: true, rows: items});
+            })
+        })
+
+    }
 };
 
 exports.majorCreate = function(req, res){
@@ -456,3 +605,4 @@ exports.majorCreate = function(req, res){
         })
     }
 };
+

@@ -48,6 +48,29 @@ exports.getLocationSelectStyle = function(req, res){
     })
 };
 
+exports.getGradeSelectStyle = function(req, res){
+    getTranslationByFlag(req, 'grade', function(err, translations){
+        if (err) {
+            console.error("getGradeSelectStyle ====>" + err.message);
+            return res.json({isSuccess: false});
+        }
+        res.render('translation/translationSelectStyle', {translations: translations});
+    })
+};
+
+exports.getVintageSelectStyle = function(req, res){
+    var currentYear = moment().format("YYYY");
+    var end = currentYear - 50;
+    var items = [];
+    for(var i=currentYear; i > end; i--) {
+        var item = {};
+        item.id = i;
+        item.name = i;
+        items.push(item);
+    }
+    res.render('translation/translationSelectStyle', {translations: items});
+};
+
 exports.getVintages = function(req, res){
     var currentYear = moment().format("YYYY");
     var end = currentYear - 50;
